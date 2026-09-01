@@ -4,7 +4,7 @@
 // ============================================================
 
 import React, { useRef, useState, useCallback } from 'react';
-import { Scissors, FileDown, Image, Sparkles, Eye, Layout } from 'lucide-react';
+import { Scissors, FileDown, Image, Layout } from 'lucide-react';
 import PatternCanvas from './PatternCanvas';
 import type { PatternCanvasHandle } from './PatternCanvas';
 import ZoomControls from './ZoomControls';

@@ -19,13 +19,16 @@ import { CAD_MODEL_SPECS, type CADModelSpecification } from '../utils/cadModelRe
 interface CADMaterialPreviewCardProps {
   patternType: PatternType;
   measurements: Measurements;
-  _onSelectPatternType?: (t: PatternType) => void;
+  onSelectPatternType?: (t: PatternType) => void;
 }
 
 const CADMaterialPreviewCard: React.FC<CADMaterialPreviewCardProps> = ({
   patternType,
   measurements,
+  onSelectPatternType,
 }) => {
+  void onSelectPatternType;
+
   const spec: CADModelSpecification =
     CAD_MODEL_SPECS[patternType] || CAD_MODEL_SPECS.ONE_PIECE;
 
