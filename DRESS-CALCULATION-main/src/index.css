@@ -3324,3 +3324,804 @@ h1, h2, h3, h4, h5, .brand-name, .hero-title, .module-title, .preview-heading, .
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   NEW FEATURES: FABRIC WASTE, PRICE ESTIMATION & 5-STAGE TRACKER
+   ============================================================ */
+
+/* ── Fabric Waste Calculator Styles ───────────────────────── */
+.fabric-waste-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.waste-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.badge-pill-purple {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #EDE9FE;
+  color: #6D28D9;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.waste-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.waste-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.waste-grid-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.waste-controls-panel {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.dress-selector-grid-sm {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.selector-chip-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.selector-chip-btn:hover {
+  background: #ffffff;
+  border-color: var(--primary);
+}
+
+.selector-chip-btn.active {
+  background: #EEF2FF;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.layout-spec-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--surface-subtle);
+  padding: 10px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.waste-metrics-4grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.metric-card.metric-primary { background: #EEF2FF; border: 1px solid #C7D2FE; }
+.metric-card.metric-success { background: #ECFDF5; border: 1px solid #A7F3D0; }
+.metric-card.metric-warning { background: #FFF1F2; border: 1px solid #FECDD3; }
+.metric-card.metric-danger { background: #FFFBEB; border: 1px solid #FDE68A; }
+
+.metric-big-num {
+  font-size: 24px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.metric-unit-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.text-emerald { color: #059669; }
+.text-rose { color: #E11D48; }
+.text-amber { color: #D97706; }
+.text-purple { color: #7C3AED; }
+
+.progress-bar-container {
+  display: flex;
+  height: 32px;
+  width: 100%;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+  margin-top: 12px;
+}
+
+.progress-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  transition: width 0.4s ease;
+}
+
+.segment-usable {
+  background: linear-gradient(90deg, #10B981, #059669);
+}
+
+.segment-waste {
+  background: linear-gradient(90deg, #F43F5E, #E11D48);
+}
+
+.bar-legend-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-usable { background: #10B981; }
+.dot-waste { background: #F43F5E; }
+
+.waste-factor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.factor-item {
+  display: grid;
+  grid-template-columns: 180px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.factor-bar-wrap {
+  height: 8px;
+  background: var(--surface-subtle);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.factor-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  display: block;
+}
+
+.fill-blue { background: #3B82F6; }
+.fill-purple { background: #8B5CF6; }
+.fill-amber { background: #F59E0B; }
+.fill-rose { background: #F43F5E; }
+
+/* ── Tailoring Price Calculator Styles ────────────────────── */
+.price-calculator-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.price-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.badge-pill-emerald {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #D1FAE5;
+  color: #065F46;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.price-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.price-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.price-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.price-inputs-panel {
+  padding: 24px;
+}
+
+.form-label-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.input-prefix-wrap, .input-suffix-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.input-prefix-wrap .form-input-lg {
+  padding-left: 28px;
+}
+
+.input-suffix {
+  position: absolute;
+  right: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.form-input-lg {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.form-input-lg:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.input-error {
+  border-color: #F43F5E !important;
+}
+
+.error-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #F43F5E;
+  margin-top: 3px;
+}
+
+.field-hint-sm {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.price-hero-card {
+  background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
+  color: #ffffff;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px rgba(30, 27, 75, 0.25);
+}
+
+.price-hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-hero-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #C7D2FE;
+}
+
+.currency-badge-inr {
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.price-hero-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.currency-symbol-hero {
+  font-size: 28px;
+  font-weight: 800;
+  color: #34D399;
+}
+
+.amount-number-hero {
+  font-size: 40px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.price-hero-sub {
+  font-size: 12px;
+  color: #A5B4FC;
+  margin-top: 4px;
+}
+
+.equation-bar-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+}
+
+.eq-chunk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.eq-label {
+  font-size: 10px;
+  color: #A5B4FC;
+  text-transform: uppercase;
+}
+
+.eq-val {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.eq-plus, .eq-equals {
+  font-size: 14px;
+  font-weight: 800;
+  color: #818CF8;
+}
+
+.itemized-price-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.itemized-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.itemized-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-title { font-size: 13px; font-weight: 600; color: var(--text-main); }
+.item-sub { font-size: 11px; color: var(--text-muted); }
+.item-title-lg { font-size: 14px; font-weight: 800; color: var(--text-main); }
+.item-amount-lg { font-size: 18px; font-weight: 800; }
+
+.price-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── 5-Stage Order Tracking System Styles ─────────────────── */
+.order-tracking-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  border-left: 4px solid var(--primary);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.order-tracking-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.order-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px dashed var(--border-light);
+  padding-bottom: 10px;
+}
+
+.order-id-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ord-number {
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.order-dates-group {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+}
+
+.date-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+}
+
+.date-item.due-date {
+  color: var(--text-main);
+}
+
+.order-customer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cust-name-phone {
+  display: flex;
+  align-items: center;
+}
+
+.cust-name-bold {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-left: 4px;
+}
+
+.cust-phone-num {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.cust-specs-line {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dot-sep {
+  margin: 0 4px;
+  color: var(--border-medium);
+}
+
+.special-instructions-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: #78350F;
+}
+
+.order-price-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.price-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.price-value {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* ── 5-STAGE VISUAL STEP PROGRESS BAR ─────────────────────── */
+.visual-status-tracker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--surface-subtle);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.tracker-steps-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  position: relative;
+  gap: 8px;
+}
+
+.tracker-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.tracker-step-item:hover .step-circle {
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+.tracker-step-item.passed .step-circle {
+  background: #10B981;
+  border-color: #10B981;
+  color: #ffffff;
+}
+
+.tracker-step-item.active .step-circle {
+  background: linear-gradient(135deg, #7C3AED, #4F46E5);
+  border-color: #7C3AED;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2);
+  transform: scale(1.15);
+}
+
+.step-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.tracker-step-item.active .step-label {
+  color: #7C3AED;
+  font-weight: 800;
+}
+
+.tracker-step-item.passed .step-label {
+  color: var(--text-main);
+}
+
+.tracker-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px dashed var(--border-light);
+  padding-top: 10px;
+}
+
+/* Status Badges */
+.status-select-badge {
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  outline: none;
+  cursor: pointer;
+}
+
+.status-select-badge.status-pending { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+.status-select-badge.status-cutting { background: #E0E7FF; color: #3730A3; border-color: #C7D2FE; }
+.status-select-badge.status-stitching,
+.status-select-badge.status-in_progress { background: #F3E8FF; color: #6B21A8; border-color: #E9D5FF; }
+.status-select-badge.status-ready { background: #D1FAE5; color: #065F46; border-color: #A7F3D0; }
+.status-select-badge.status-delivered { background: #DCFCE7; color: #166534; border-color: #86EFAC; }
+
+/* Modal Form Styles */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2500;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.order-modal-wrap {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.close-modal-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.close-modal-btn:hover {
+  background: var(--surface-subtle);
+  color: var(--text-main);
+}
+
+.form-grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.form-input-xs {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  outline: none;
+}
+
+.form-textarea-sm {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  outline: none;
+  font-family: inherit;
+}
+
+.modal-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-cancel {
+  padding: 8px 16px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* Responsive queries for new components */
+@media (max-width: 900px) {
+  .waste-grid-layout, .price-grid-layout {
+    grid-template-columns: 1fr;
+  }
+  .waste-metrics-4grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .waste-metrics-4grid {
+    grid-template-columns: 1fr;
+  }
+  .tracker-steps-bar {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+  }
+  .step-label {
+    font-size: 9px;
+  }
+  .step-circle {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+  }
+  .price-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

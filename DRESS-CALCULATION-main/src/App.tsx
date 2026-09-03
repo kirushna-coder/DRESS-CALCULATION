@@ -15,10 +15,13 @@ import FabricSelector from './components/FabricSelector';
 import DressPreview2D from './components/DressPreview2D';
 import AIRecommendationCard from './components/AIRecommendationCard';
 import SmartFabricSummary from './components/SmartFabricSummary';
+import FabricWasteCalculator from './components/FabricWasteCalculator';
+import TailoringPriceCalculator from './components/TailoringPriceCalculator';
 import InvoiceModal from './components/InvoiceModal';
 import OrdersManager from './components/OrdersManager';
 import CustomerDirectory from './components/CustomerDirectory';
 import CADStudio from './components/CADStudio';
+import SmartSizeStudio from './components/SmartSizeStudio';
 
 // Hooks & Utils
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -49,7 +52,7 @@ const App: React.FC = () => {
   // ── Navigation & Global View State ───────────────────────
   const [activeTab, setActiveTab] = useLocalStorage<ActiveTab>(
     'smarttailor-active-tab',
-    'dashboard'
+    'calculator'
   );
   const [unit, setUnit] = useLocalStorage<Unit>('smarttailor-unit', 'in');
   const [currency, setCurrency] = useLocalStorage<Currency>(
@@ -234,6 +237,7 @@ const App: React.FC = () => {
       deliveryDueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split('T')[0],
+      specialInstructions: `${fabricColor} ${fabricType} ${dressType} with ${calculationResult.requiredLengthMeters}m fabric.`,
       notes: `${fabricColor} ${fabricType} ${dressType} with ${calculationResult.requiredLengthMeters}m fabric.`,
       aiRecommendations: aiRecommendation,
     };
@@ -253,6 +257,14 @@ const App: React.FC = () => {
     setOrders,
     setActiveTab,
   ]);
+
+  const handleAddDirectOrder = useCallback(
+    (newOrder: Order) => {
+      setOrders([newOrder, ...orders]);
+      showToast(`Order ${newOrder.orderNumber} added successfully!`);
+    },
+    [orders, setOrders]
+  );
 
   const handleUpdateOrderStatus = useCallback(
     (orderId: string, status: OrderStatus) => {
@@ -313,19 +325,7 @@ const App: React.FC = () => {
 
       {/* ── Main Application View Router ─────────────────── */}
       <main className="app-main-viewport">
-        {/* 1. Dashboard View */}
-        {activeTab === 'dashboard' && (
-          <Dashboard
-            customers={customers}
-            orders={orders}
-            currency={currency}
-            onNavigate={setActiveTab}
-            onSelectOrder={handleViewOrderInvoice}
-            onUpdateOrderStatus={handleUpdateOrderStatus}
-          />
-        )}
-
-        {/* 2. Smart Calculator & Design Studio */}
+        {/* 1. Dress Calculation View */}
         {activeTab === 'calculator' && (
           <div className="calculator-view-grid">
             {/* Left Column: Measurements + Dress + Fabric Selectors */}
@@ -394,7 +394,41 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* 3. CAD Pattern Studio View */}
+        {/* 2. Fabric Waste Calculator View */}
+        {activeTab === 'fabric_waste' && (
+          <FabricWasteCalculator
+            currentDressType={dressType}
+            currentFabricType={fabricType}
+            currentMeasurements={measurements}
+            onNavigate={setActiveTab}
+          />
+        )}
+
+        {/* 3. Tailoring Price Calculator View */}
+        {activeTab === 'price_estimation' && (
+          <TailoringPriceCalculator
+            currentCalculation={calculationResult}
+            currency={currency}
+            onSaveOrder={handleSaveAsOrder}
+            onOpenInvoice={handleOpenCurrentInvoice}
+            onNavigate={setActiveTab}
+          />
+        )}
+
+        {/* 4. Order Tracking System View */}
+        {activeTab === 'orders' && (
+          <OrdersManager
+            orders={orders}
+            onUpdateStatus={handleUpdateOrderStatus}
+            onDeleteOrder={handleDeleteOrder}
+            onViewInvoice={handleViewOrderInvoice}
+            onNavigate={setActiveTab}
+            onAddOrder={handleAddDirectOrder}
+            currency={currency}
+          />
+        )}
+
+        {/* 5. CAD Pattern Studio View */}
         {activeTab === 'cad_studio' && (
           <CADStudio
             measurements={measurements}
@@ -406,19 +440,15 @@ const App: React.FC = () => {
           />
         )}
 
-        {/* 4. Orders & Invoices Management View */}
-        {activeTab === 'orders' && (
-          <OrdersManager
-            orders={orders}
-            onUpdateStatus={handleUpdateOrderStatus}
-            onDeleteOrder={handleDeleteOrder}
-            onViewInvoice={handleViewOrderInvoice}
-            onNavigate={setActiveTab}
-            currency={currency}
+        {/* 6. Size Intelligence View */}
+        {activeTab === 'ai_insights' && (
+          <SmartSizeStudio
+            measurements={measurements}
+            onMeasurementsChange={setMeasurements}
           />
         )}
 
-        {/* 5. Customer Directory View */}
+        {/* 7. Customer Directory View */}
         {activeTab === 'customers' && (
           <CustomerDirectory
             customers={customers}
@@ -428,6 +458,18 @@ const App: React.FC = () => {
             }}
             onDeleteCustomer={handleDeleteCustomer}
             onNavigate={setActiveTab}
+          />
+        )}
+
+        {/* 8. Dashboard View */}
+        {activeTab === 'dashboard' && (
+          <Dashboard
+            customers={customers}
+            orders={orders}
+            currency={currency}
+            onNavigate={setActiveTab}
+            onSelectOrder={handleViewOrderInvoice}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
           />
         )}
       </main>

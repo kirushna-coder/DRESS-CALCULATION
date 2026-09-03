@@ -1,32 +1,46 @@
-# React + TypeScript + Vite
+# DRESS CALCULATION
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+## AI-Based Smart Dress Size Recommendation System
 
-Currently, two official plugins are available:
+SmartTailor is a React, TypeScript, and Vite application for measurement-led dress sizing and tailoring operations. It combines a local intelligent recommendation engine with the existing fabric calculator, 2D preview, CAD pattern studio, customer directory, order workflow, and invoice tools.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Smart sizing workflow
 
-## React Compiler
+`User measurements -> Validation -> BMI -> Body shape -> Smart size -> Personalized styles -> PDF report`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The **Size Intelligence** tab accepts gender, age, height, weight, chest/bust, waist, hip, and preferred fit. It calculates an XS-XXL recommendation from all three key circumferences, reports a confidence score and explanation, classifies body shape using ratios, and suggests three clothing styles. The logic runs entirely in the browser; it does not require an API or backend.
 
-## Expanding the Oxlint configuration
+### Included features
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+- Women, men, and kids interactive size charts with highlighted results
+- BMI value and general category with a health-assessment disclaimer
+- Optional body image upload with local preview only; no measurement claims
+- Calculation history stored in localStorage, including load, delete, and clear actions
+- Downloadable PDF size report generated with jsPDF
+- Persistent light/dark theme for the smart sizing studio
+- Validation messages, analysis loading state, reset action, accessible labels, and responsive mobile layout
+- Existing fabric, garment, cost, CAD, order, invoice, and customer functionality preserved
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Run locally
+
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Open the Vite URL shown in the terminal. Production verification:
+
+```bash
+npm run build
+npm run lint
+```
+
+## Project map
+
+- `src/components/SmartSizeStudio.tsx` - smart sizing interface, history, upload preview, chart, and report action
+- `src/components/SmartSizeStudio.css` - responsive premium UI and theme styles
+- `src/utils/smartRecommendation.ts` - typed local sizing, BMI, body-shape, confidence, and style engine
+- `src/App.tsx` - preserves the original application router and mounts the new Size Intelligence view
+- `src/components/Navigation.tsx` - adds the Size Intelligence navigation entry
+
+All profile history, current measurements, theme preference, customers, and orders remain client-side localStorage data.

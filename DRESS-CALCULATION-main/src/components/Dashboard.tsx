@@ -35,13 +35,13 @@ const Dashboard: React.FC<DashboardProps> = ({
   onSelectOrder,
   onUpdateOrderStatus,
 }) => {
-  // ── Metrics ──────────────────────────────────────────────
   const totalCustomers = customers.length;
   const totalOrders = orders.length;
 
   const totalRevenue = orders.reduce((sum, ord) => sum + (ord.totalCost || 0), 0);
   const pendingOrders = orders.filter((o) => o.status === 'pending').length;
-  const inProgressOrders = orders.filter((o) => o.status === 'in_progress').length;
+  const cuttingOrders = orders.filter((o) => o.status === 'cutting').length;
+  const stitchingOrders = orders.filter((o) => o.status === 'stitching' || o.status === 'in_progress').length;
   const readyOrders = orders.filter((o) => o.status === 'ready').length;
   const deliveredOrders = orders.filter((o) => o.status === 'delivered').length;
 
@@ -130,12 +130,12 @@ const Dashboard: React.FC<DashboardProps> = ({
             <div className="metric-value-row">
               <span className="metric-number">{totalOrders}</span>
               <span className="metric-status-dots">
-                <span className="dot in-progress" title={`${inProgressOrders} In Progress`} />
+                <span className="dot in-progress" title={`${stitchingOrders} In Stitching`} />
                 <span className="dot ready" title={`${readyOrders} Ready`} />
               </span>
             </div>
             <span className="metric-footer-text">
-              {inProgressOrders} active in workshop &bull; {readyOrders} ready
+              {cuttingOrders + stitchingOrders} active in workshop &bull; {readyOrders} ready
             </span>
           </div>
         </div>
@@ -165,7 +165,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div className="metric-content">
             <span className="metric-label">Workshop Pipeline</span>
             <div className="metric-value-row">
-              <span className="metric-number">{pendingOrders + inProgressOrders}</span>
+              <span className="metric-number">{pendingOrders + cuttingOrders + stitchingOrders}</span>
               <span className="metric-sub-badge warning">Active</span>
             </div>
             <span className="metric-footer-text">{deliveredOrders} successfully delivered</span>
@@ -318,12 +318,13 @@ const Dashboard: React.FC<DashboardProps> = ({
                     <td>
                       <select
                         className={`status-select-badge status-${ord.status}`}
-                        value={ord.status}
+                        value={ord.status === 'in_progress' ? 'stitching' : ord.status}
                         onChange={(e) => onUpdateOrderStatus(ord.id, e.target.value as OrderStatus)}
                         aria-label="Update Order Status"
                       >
                         <option value="pending">⏳ Pending</option>
-                        <option value="in_progress">⚙️ In Progress</option>
+                        <option value="cutting">✂️ Cutting</option>
+                        <option value="stitching">🪡 Stitching</option>
                         <option value="ready">✨ Ready</option>
                         <option value="delivered">✅ Delivered</option>
                       </select>

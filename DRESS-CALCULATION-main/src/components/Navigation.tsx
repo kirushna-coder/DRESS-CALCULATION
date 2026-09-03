@@ -13,6 +13,8 @@ import {
   Sparkles,
   DollarSign,
   Ruler,
+  PieChart,
+  IndianRupee,
 } from 'lucide-react';
 import type { ActiveTab, Currency, Unit } from '../types';
 
@@ -51,7 +53,7 @@ const Navigation: React.FC<NavigationProps> = ({
               <Sparkles size={10} /> AI
             </span>
           </div>
-          <span className="brand-tagline">Intelligent Dress Calculation & Tailoring</span>
+          <span className="brand-tagline">Tailoring Management System</span>
         </div>
       </div>
 
@@ -59,29 +61,29 @@ const Navigation: React.FC<NavigationProps> = ({
       <nav className="nav-tabs" aria-label="Main Navigation">
         <button
           type="button"
-          className={`nav-tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => onTabChange('dashboard')}
-        >
-          <LayoutDashboard size={15} />
-          <span>Dashboard</span>
-        </button>
-
-        <button
-          type="button"
           className={`nav-tab-btn ${activeTab === 'calculator' ? 'active' : ''}`}
           onClick={() => onTabChange('calculator')}
         >
           <Calculator size={15} />
-          <span>Smart Calculator</span>
+          <span>Dress Calculation</span>
         </button>
 
         <button
           type="button"
-          className={`nav-tab-btn ${activeTab === 'cad_studio' ? 'active' : ''}`}
-          onClick={() => onTabChange('cad_studio')}
+          className={`nav-tab-btn ${activeTab === 'fabric_waste' ? 'active' : ''}`}
+          onClick={() => onTabChange('fabric_waste')}
         >
-          <Compass size={15} />
-          <span>CAD Pattern Studio</span>
+          <PieChart size={15} />
+          <span>Fabric Waste</span>
+        </button>
+
+        <button
+          type="button"
+          className={`nav-tab-btn ${activeTab === 'price_estimation' ? 'active' : ''}`}
+          onClick={() => onTabChange('price_estimation')}
+        >
+          <IndianRupee size={15} />
+          <span>Price Estimation</span>
         </button>
 
         <button
@@ -90,8 +92,26 @@ const Navigation: React.FC<NavigationProps> = ({
           onClick={() => onTabChange('orders')}
         >
           <ShoppingBag size={15} />
-          <span>Orders</span>
+          <span>Order Tracking</span>
           {ordersCount > 0 && <span className="tab-counter">{ordersCount}</span>}
+        </button>
+
+        <button
+          type="button"
+          className={`nav-tab-btn ${activeTab === 'cad_studio' ? 'active' : ''}`}
+          onClick={() => onTabChange('cad_studio')}
+        >
+          <Compass size={15} />
+          <span>CAD Studio</span>
+        </button>
+
+        <button
+          type="button"
+          className={`nav-tab-btn ${activeTab === 'ai_insights' ? 'active' : ''}`}
+          onClick={() => onTabChange('ai_insights')}
+        >
+          <Sparkles size={15} />
+          <span>Size Intelligence</span>
         </button>
 
         <button
@@ -102,6 +122,15 @@ const Navigation: React.FC<NavigationProps> = ({
           <Users size={15} />
           <span>Customers</span>
           {customersCount > 0 && <span className="tab-counter secondary">{customersCount}</span>}
+        </button>
+
+        <button
+          type="button"
+          className={`nav-tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
+          onClick={() => onTabChange('dashboard')}
+        >
+          <LayoutDashboard size={15} />
+          <span>Dashboard</span>
         </button>
       </nav>
 

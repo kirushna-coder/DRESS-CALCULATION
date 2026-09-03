@@ -134,6 +134,8 @@ export interface FabricCalculationResult {
   fabricType: FabricType;
   requiredLengthMeters: number;
   requiredLengthYards: number;
+  usableFabricMeters: number;
+  estimatedWasteMeters: number;
   fabricWidthInches: number;
   
   // Cost breakdown
@@ -154,9 +156,15 @@ export interface FabricCalculationResult {
   discountAmount: number;
   totalCost: number;
 
-  // Tailoring guidance
+  // Tailoring guidance & Fabric Waste breakdown
   cuttingWasteEstimatePercent: number;
   fabricLayoutSuggestion: string;
+  wasteBreakdown?: {
+    seamAllowanceMeters: number;
+    curveOffcutsMeters: number;
+    selvageTrimMeters: number;
+    shrinkageBufferMeters: number;
+  };
 }
 
 /** AI Body Analysis & Recommendation Result */
@@ -199,7 +207,7 @@ export interface Customer {
 }
 
 /** Order Management State */
-export type OrderStatus = 'pending' | 'in_progress' | 'ready' | 'delivered';
+export type OrderStatus = 'pending' | 'cutting' | 'stitching' | 'ready' | 'delivered' | 'in_progress';
 export type PaymentStatus = 'unpaid' | 'deposit_paid' | 'fully_paid';
 
 export interface Order {
@@ -221,6 +229,7 @@ export interface Order {
   paymentStatus: PaymentStatus;
   orderDate: string;
   deliveryDueDate: string;
+  specialInstructions?: string;
   notes?: string;
   aiRecommendations?: AIRecommendationResult;
 }
@@ -229,7 +238,9 @@ export interface Order {
 export type ActiveTab =
   | 'dashboard'
   | 'calculator'
-  | 'cad_studio'
+  | 'fabric_waste'
+  | 'price_estimation'
   | 'orders'
+  | 'cad_studio'
   | 'customers'
   | 'ai_insights';

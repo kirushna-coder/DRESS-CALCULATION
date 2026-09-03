@@ -203,11 +203,22 @@ export function calculateFabricRequirement(
   const taxAmount = taxPercent > 0 ? Math.round((afterDiscount * taxPercent) / 100) : 0;
   const totalCost = afterDiscount + taxAmount;
 
+  const estimatedWasteMeters = Number(((roundedMeters * wasteEstimate) / 100).toFixed(2));
+  const usableFabricMeters = Number((roundedMeters - estimatedWasteMeters).toFixed(2));
+
+  // Category breakdown of waste meters
+  const seamAllowanceMeters = Number((estimatedWasteMeters * 0.35).toFixed(2));
+  const curveOffcutsMeters = Number((estimatedWasteMeters * 0.30).toFixed(2));
+  const selvageTrimMeters = Number((estimatedWasteMeters * 0.20).toFixed(2));
+  const shrinkageBufferMeters = Number((estimatedWasteMeters * 0.15).toFixed(2));
+
   return {
     garmentType,
     fabricType,
     requiredLengthMeters: roundedMeters,
     requiredLengthYards: roundedYards,
+    usableFabricMeters,
+    estimatedWasteMeters,
     fabricWidthInches: fabricInfo.standardWidthInches,
     pricePerMeter,
     fabricCost,
@@ -227,5 +238,11 @@ export function calculateFabricRequirement(
     totalCost,
     cuttingWasteEstimatePercent: wasteEstimate,
     fabricLayoutSuggestion: layoutSuggestion,
+    wasteBreakdown: {
+      seamAllowanceMeters,
+      curveOffcutsMeters,
+      selvageTrimMeters,
+      shrinkageBufferMeters,
+    },
   };
 }
