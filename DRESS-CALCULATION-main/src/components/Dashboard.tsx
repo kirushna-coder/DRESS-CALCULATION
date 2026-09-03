@@ -209,7 +209,12 @@ const Dashboard: React.FC<DashboardProps> = ({
                 );
               })
             ) : (
-              <p className="empty-text">No order data yet. Create your first calculation!</p>
+              <div className="popular-empty-state">
+                <div className="empty-icon-circle">
+                  <Scissors size={22} />
+                </div>
+                <p className="empty-text">No order data yet. Create your first calculation!</p>
+              </div>
             )}
           </div>
         </div>
