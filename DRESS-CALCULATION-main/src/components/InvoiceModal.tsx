@@ -158,7 +158,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 <Scissors size={24} />
               </div>
               <div>
-                <h1 className="studio-name">SmartTailor AI Studio</h1>
+                <h1 className="studio-name">FabriPlay Studio</h1>
                 <p className="studio-sub">Haute Couture &bull; Bespoke Pattern &bull; Digital Tailoring</p>
                 <p className="studio-address">
                   7th Floor, Fashion Tech Boulevard, Bangalore 560001 &bull; Phone: +91 80 2345 6789
@@ -389,7 +389,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               <h5 className="terms-title">Terms &amp; Tailoring Guarantee:</h5>
               <p>1. Free alterations within 14 days of delivery for perfect fit guarantee.</p>
               <p>2. Fabric pre-shrunk and handled with industrial steam treatment.</p>
-              <p>3. Thank you for choosing SmartTailor AI Studio!</p>
+              <p>3. Thank you for choosing FabriPlay Studio!</p>
             </div>
 
             <div className="invoice-summary-card">

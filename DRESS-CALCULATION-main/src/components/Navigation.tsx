@@ -48,12 +48,12 @@ const Navigation: React.FC<NavigationProps> = ({
         </div>
         <div className="brand-text">
           <div className="brand-title-row">
-            <span className="brand-name">SmartTailor</span>
+            <span className="brand-name">FabriPlay</span>
             <span className="brand-badge-ai">
               <Sparkles size={10} /> AI
             </span>
           </div>
-          <span className="brand-tagline">Tailoring Management System</span>
+          <span className="brand-tagline">Smart Fabric Calculation &amp; Tailoring System</span>
         </div>
       </div>
 

@@ -56,7 +56,7 @@ const CADStudio: React.FC<CADStudioProps> = ({
   const handleDownloadSVG = useCallback(() => {
     const svg = canvasRef.current?.getSVGElement();
     if (!svg) return;
-    downloadSVG(svg, `SmartTailor-CAD-${patternType}-size${measurements.dressSize}`);
+    downloadSVG(svg, `FabriPlay-CAD-${patternType}-size${measurements.dressSize}`);
   }, [measurements.dressSize, patternType]);
 
   const handleDownloadPDF = useCallback(async () => {
@@ -66,7 +66,7 @@ const CADStudio: React.FC<CADStudioProps> = ({
     try {
       await downloadPDF(
         container,
-        `SmartTailor-CAD-${patternType}-size${measurements.dressSize}`
+        `FabriPlay-CAD-${patternType}-size${measurements.dressSize}`
       );
     } finally {
       setIsExporting(false);
