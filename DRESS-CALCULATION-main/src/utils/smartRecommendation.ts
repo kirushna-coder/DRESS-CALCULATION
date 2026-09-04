@@ -1,8 +1,16 @@
-import type { Gender } from '../types';
+import type { Gender, PhotoLandmarks } from '../types';
 
 export type SizeLabel = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
 export type FitPreference = 'Slim' | 'Regular' | 'Loose';
-export type BodyShape = 'Rectangle' | 'Hourglass' | 'Pear' | 'Apple' | 'Inverted Triangle' | 'Triangle' | 'Trapezoid' | 'Oval';
+export type BodyShape =
+  | 'Rectangle'
+  | 'Hourglass'
+  | 'Pear'
+  | 'Apple'
+  | 'Inverted Triangle'
+  | 'Triangle'
+  | 'Trapezoid'
+  | 'Oval';
 
 export interface SmartProfile {
   gender: Gender;
@@ -25,6 +33,12 @@ export interface SmartRecommendation {
   explanation: string;
   shapeExplanation: string;
   styles: string[];
+  photoInsights?: {
+    visualWaistToHip: number;
+    visualFitAdjustment: string;
+    alignmentScore: number;
+    comparisonNote: string;
+  };
 }
 
 const SIZE_CHART = [
@@ -38,7 +52,11 @@ const SIZE_CHART = [
 
 export const SIZE_CHARTS = {
   Women: SIZE_CHART,
-  Men: SIZE_CHART.map((row) => ({ ...row, chest: [row.chest[0] + 4, row.chest[1] + 6] as [number, number], hip: [row.hip[0] + 2, row.hip[1] + 4] as [number, number] })),
+  Men: SIZE_CHART.map((row) => ({
+    ...row,
+    chest: [row.chest[0] + 4, row.chest[1] + 6] as [number, number],
+    hip: [row.hip[0] + 2, row.hip[1] + 4] as [number, number],
+  })),
   Kids: [
     { size: 'XS' as const, chest: [52, 58], waist: [50, 54], hip: [56, 62], height: [95, 110] },
     { size: 'S' as const, chest: [58, 64], waist: [54, 58], hip: [62, 68], height: [110, 125] },
@@ -49,36 +67,126 @@ export const SIZE_CHARTS = {
   ],
 };
 
-export function calculateSmartRecommendation(profile: SmartProfile): SmartRecommendation {
-  const bmi = Number((profile.weight / ((profile.height / 100) ** 2)).toFixed(1));
-  const bmiCategory = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Healthy range' : bmi < 30 ? 'Overweight' : 'Obesity';
+export function calculateSmartRecommendation(
+  profile: SmartProfile,
+  photoLandmarks?: PhotoLandmarks | null
+): SmartRecommendation {
+  const bmi = Number((profile.weight / (profile.height / 100) ** 2).toFixed(1));
+  const bmiCategory =
+    bmi < 18.5
+      ? 'Underweight'
+      : bmi < 25
+      ? 'Healthy range'
+      : bmi < 30
+      ? 'Overweight'
+      : 'Obesity';
+
   const largestMeasurement = Math.max(profile.chest, profile.waist, profile.hip);
-  const sizeIndex = SIZE_CHART.findIndex((row) => largestMeasurement <= Math.max(row.chest[1], row.waist[1], row.hip[1]));
+  const sizeIndex = SIZE_CHART.findIndex(
+    (row) => largestMeasurement <= Math.max(row.chest[1], row.waist[1], row.hip[1])
+  );
   const fitAdjustment = profile.fit === 'Loose' ? 1 : profile.fit === 'Slim' ? -1 : 0;
-  const size = SIZE_CHART[Math.min(5, Math.max(0, (sizeIndex < 0 ? 5 : sizeIndex) + fitAdjustment))].size;
+  const size =
+    SIZE_CHART[Math.min(5, Math.max(0, (sizeIndex < 0 ? 5 : sizeIndex) + fitAdjustment))].size;
+
   const row = SIZE_CHART.find((item) => item.size === size)!;
   const distances = [profile.chest, profile.waist, profile.hip].map((value, index) => {
     const range = [row.chest, row.waist, row.hip][index];
     return Math.min(Math.abs(value - range[0]), Math.abs(value - range[1]));
   });
-  const confidence = Math.max(72, Math.min(98, Math.round(98 - (distances.reduce((sum, value) => sum + value, 0) / 3) * 1.5)));
+  let confidence = Math.max(
+    72,
+    Math.min(98, Math.round(98 - (distances.reduce((sum, value) => sum + value, 0) / 3) * 1.5))
+  );
+
   const waistRatio = profile.waist / Math.max(profile.hip, 1);
   let bodyShape: BodyShape = 'Rectangle';
-  if (profile.gender === 'female') {
+
+  const isFemale = profile.gender === 'female';
+  const isMale = profile.gender === 'male';
+
+  if (isFemale) {
     if (waistRatio < 0.78 && Math.abs(profile.chest - profile.hip) < 8) bodyShape = 'Hourglass';
     else if (profile.hip - profile.chest > 8) bodyShape = 'Pear';
     else if (profile.chest - profile.hip > 8) bodyShape = 'Inverted Triangle';
     else if (waistRatio > 0.86) bodyShape = 'Apple';
-  } else {
+  } else if (isMale) {
     if (waistRatio > 0.94) bodyShape = 'Oval';
     else if (profile.chest - profile.hip > 10) bodyShape = 'Inverted Triangle';
     else if (profile.hip - profile.chest > 8) bodyShape = 'Triangle';
     else if (profile.chest / Math.max(profile.waist, 1) > 1.18) bodyShape = 'Trapezoid';
+  } else {
+    // For 'other', 'prefer_not_to_say', 'unisex', 'kids'
+    if (waistRatio < 0.78) bodyShape = 'Hourglass';
+    else if (profile.hip - profile.chest > 8) bodyShape = 'Pear';
+    else if (profile.chest - profile.hip > 8) bodyShape = 'Inverted Triangle';
+    else if (waistRatio > 0.88) bodyShape = 'Oval';
   }
-  const shapeExplanation = `${bodyShape} pattern detected from chest-to-hip balance and a ${waistRatio.toFixed(2)} waist-to-hip ratio.`;
-  const styles = profile.gender === 'female'
-    ? bodyShape === 'Pear' ? ['A-line dress', 'High-waist jeans', 'Structured blouse'] : bodyShape === 'Hourglass' ? ['Tailored wrap dress', 'Slim fit shirt', 'High-waist trousers'] : ['A-line dress', 'Regular fit shirt', 'Straight fit jeans']
-    : bodyShape === 'Inverted Triangle' ? ['Regular fit shirt', 'Straight fit jeans', 'Soft-shoulder casual wear'] : ['Slim fit shirt', 'Straight fit jeans', 'Smart casual wear'];
+
+  let shapeExplanation = `${bodyShape} pattern detected from chest-to-hip balance and a ${waistRatio.toFixed(
+    2
+  )} waist-to-hip ratio.`;
+
+  // Base styles
+  let styles: string[] = [];
+  if (isFemale) {
+    styles =
+      bodyShape === 'Pear'
+        ? ['A-line dress', 'High-waist jeans', 'Structured blouse']
+        : bodyShape === 'Hourglass'
+        ? ['Tailored wrap dress', 'Slim fit shirt', 'High-waist trousers']
+        : ['A-line dress', 'Regular fit shirt', 'Straight fit jeans'];
+  } else if (isMale) {
+    styles =
+      bodyShape === 'Inverted Triangle'
+        ? ['Regular fit shirt', 'Straight fit jeans', 'Soft-shoulder casual wear']
+        : ['Slim fit shirt', 'Straight fit jeans', 'Smart casual wear'];
+  } else {
+    styles = ['Structured blazer', 'Straight fit trousers', 'Tailored casual wear'];
+  }
+
+  let photoInsights: SmartRecommendation['photoInsights'] | undefined;
+
+  if (photoLandmarks && photoLandmarks.fullBodyDetected) {
+    const visualRatio = photoLandmarks.waistToHipRatio;
+    const ratioDiff = Math.abs(visualRatio - waistRatio);
+    const alignmentScore = Math.max(82, Math.min(99, Math.round(99 - ratioDiff * 25)));
+
+    // Boost confidence slightly when visual proportions match manual metrics
+    confidence = Math.min(99, confidence + Math.round((alignmentScore - 80) / 4));
+
+    const comparisonNote = `Visual body photo proportions (ratio ${visualRatio}) align within ${alignmentScore}% of entered measurements (${profile.chest}cm bust/chest, ${profile.waist}cm waist, ${profile.hip}cm hip).`;
+
+    photoInsights = {
+      visualWaistToHip: visualRatio,
+      visualFitAdjustment: photoLandmarks.visualFitAdjustment,
+      alignmentScore,
+      comparisonNote,
+    };
+
+    shapeExplanation += ` Photo analysis confirmed ${photoLandmarks.visualFitAdjustment} visual structure.`;
+
+    // Dynamic style additions based on visual photo proportion analysis
+    if (photoLandmarks.visualFitAdjustment === 'Broad Shoulders') {
+      styles.unshift('Raglan-sleeve shirt');
+    } else if (photoLandmarks.visualFitAdjustment === 'Tapered Waist') {
+      styles.unshift('Belted silhouette dress');
+    } else if (photoLandmarks.visualFitAdjustment === 'Fuller Frame') {
+      styles.unshift('Relaxed-drape tunic');
+    }
+  }
+
+  const genderLabel =
+    profile.gender === 'female'
+      ? 'Female'
+      : profile.gender === 'male'
+      ? 'Male'
+      : profile.gender === 'other'
+      ? 'Other'
+      : profile.gender === 'prefer_not_to_say'
+      ? 'User-controlled (Prefer not to say)'
+      : profile.gender;
+
   return {
     size,
     confidence,
@@ -86,8 +194,13 @@ export function calculateSmartRecommendation(profile: SmartProfile): SmartRecomm
     bmi,
     bmiCategory,
     fit: profile.fit,
-    explanation: `${size} balances your ${profile.chest} cm chest, ${profile.waist} cm waist, and ${profile.hip} cm hip. ${profile.fit} fit preference was included in the sizing adjustment.`,
+    explanation: `${size} balances your ${profile.chest} cm chest/bust, ${profile.waist} cm waist, and ${profile.hip} cm hip (${genderLabel} profile). ${profile.fit} fit preference was included in the sizing adjustment.${
+      photoLandmarks?.fullBodyDetected
+        ? ' Enhanced with visual photo proportion analysis.'
+        : ''
+    }`,
     shapeExplanation,
     styles,
+    photoInsights,
   };
 }

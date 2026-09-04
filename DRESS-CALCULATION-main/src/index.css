@@ -13,22 +13,22 @@
 }
 
 :root {
-  /* Brand Palette */
+  /* Brand Palette - Deep Indigo & Violet Luxury Accents */
   --primary: #4F46E5;
   --primary-glow: #6366F1;
   --primary-light: #EEF2FF;
   --primary-dark: #3730A3;
 
-  --accent-gold: #F59E0B;
+  --accent-gold: #D97706;
   --accent-gold-light: #FEF3C7;
-  --accent-gold-dark: #B45309;
+  --accent-gold-dark: #92400E;
 
-  --accent-emerald: #10B981;
+  --accent-emerald: #059669;
   --accent-emerald-light: #D1FAE5;
   --accent-emerald-dark: #047857;
 
-  --accent-rose: #EC4899;
-  --accent-rose-light: #FCE7F3;
+  --accent-rose: #E11D48;
+  --accent-rose-light: #FFE4E6;
 
   /* Surfaces & Backgrounds */
   --bg-app: #F8FAFC;
@@ -38,7 +38,7 @@
 
   /* Typography */
   --text-main: #0F172A;
-  --text-muted: #64748B;
+  --text-muted: #475569;
   --text-light: #94A3B8;
   --text-white: #FFFFFF;
 
@@ -47,11 +47,11 @@
   --border-medium: #CBD5E1;
   --border-active: #6366F1;
 
-  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.10), 0 4px 12px rgba(15, 23, 42, 0.06);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.25);
+  --shadow-xs: 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 8px 24px -4px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 20px 35px -8px rgba(15, 23, 42, 0.12), 0 6px 16px -4px rgba(15, 23, 42, 0.06);
+  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.3);
 
   --radius-sm: 8px;
   --radius-md: 12px;

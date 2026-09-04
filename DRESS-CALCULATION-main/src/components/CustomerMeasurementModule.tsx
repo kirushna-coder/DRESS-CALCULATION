@@ -153,8 +153,8 @@ const CustomerMeasurementModule: React.FC<CustomerMeasurementModuleProps> = ({
           >
             <option value="female">Female</option>
             <option value="male">Male</option>
-            <option value="unisex">Unisex</option>
-            <option value="kids">Kids / Teen</option>
+            <option value="other">Other</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
           </select>
         </div>
 

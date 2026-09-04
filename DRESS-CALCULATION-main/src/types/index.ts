@@ -33,7 +33,37 @@ export interface Measurements {
   notes?: string;
 }
 
-export type Gender = 'male' | 'female' | 'unisex' | 'kids';
+export type Gender = 'female' | 'male' | 'other' | 'prefer_not_to_say' | 'unisex' | 'kids';
+
+/** Detected Body Photo Landmarks & Visual Proportions */
+export interface PhotoLandmarks {
+  shoulderWidthRatio: number; // shoulder width relative to height/frame
+  waistToHipRatio: number; // visual waist-to-hip ratio
+  torsoToLegRatio: number; // torso relative to lower body
+  symmetryScore: number; // symmetry & posture score (0-100)
+  visualFitAdjustment: 'Broad Shoulders' | 'Balanced Silhouette' | 'Tapered Waist' | 'Fuller Frame' | 'Slightly Asymmetric';
+  fullBodyDetected: boolean;
+  landmarks: {
+    head: Point;
+    neck: Point;
+    leftShoulder: Point;
+    rightShoulder: Point;
+    bustLine: Point;
+    waistLine: Point;
+    hipLine: Point;
+    leftKnee: Point;
+    rightKnee: Point;
+  };
+}
+
+export type PhotoAnalysisStep =
+  | 'idle'
+  | 'uploading'
+  | 'analyzing'
+  | 'recommendations'
+  | 'complete'
+  | 'error';
+
 
 /** A 2-D point in SVG space */
 export interface Point {
