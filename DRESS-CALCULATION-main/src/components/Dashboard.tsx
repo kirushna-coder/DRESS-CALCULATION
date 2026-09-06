@@ -173,6 +173,108 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </section>
 
+      {/* ── Feature Integration Summary Widgets ─────────── */}
+      <section className="dashboard-feature-widgets-grid">
+        {/* Widget 1: Latest Fabric Recommendation Summary */}
+        <div className="dash-widget-card fabric-rec-widget" onClick={() => onNavigate('calculator')} role="button" tabIndex={0}>
+          <div className="widget-header">
+            <div className="widget-title-group">
+              <div className="widget-icon-bg indigo">
+                <Sparkles size={16} />
+              </div>
+              <div>
+                <h4 className="widget-title">Latest Fabric Recommendation</h4>
+                <span className="widget-sub">AI Fabric Engine &bull; Summer / Casual</span>
+              </div>
+            </div>
+            <span className="dash-badge-glow">Active</span>
+          </div>
+          <div className="widget-body">
+            <div className="fabric-summary-hero">
+              <span className="dash-fabric-name">Pure Cotton &amp; Linen</span>
+              <div className="dash-score-pills">
+                <span className="dash-pill comfort">Comfort: 95%</span>
+                <span className="dash-pill durability">Durability: 85%</span>
+              </div>
+            </div>
+            <p className="dash-widget-desc">
+              Recommended for breathable comfort and minimal fabric waste cutting layout.
+            </p>
+          </div>
+          <div className="widget-footer">
+            <span>View Recommendation &bull; Dress Calculation</span>
+            <ArrowRight size={13} />
+          </div>
+        </div>
+
+        {/* Widget 2: Average Fit Confidence Summary */}
+        <div className="dash-widget-card fit-conf-widget" onClick={() => onNavigate('ai_insights')} role="button" tabIndex={0}>
+          <div className="widget-header">
+            <div className="widget-title-group">
+              <div className="widget-icon-bg emerald">
+                <TrendingUp size={16} />
+              </div>
+              <div>
+                <h4 className="widget-title">Average Fit Confidence</h4>
+                <span className="widget-sub">Studio Pattern Precision Metric</span>
+              </div>
+            </div>
+            <span className="dash-badge-emerald">92% Match</span>
+          </div>
+          <div className="widget-body">
+            <div className="fit-summary-hero">
+              <div className="mini-meter-circle">
+                <span>92%</span>
+              </div>
+              <div className="fit-summary-info">
+                <strong>Excellent Match Status</strong>
+                <p>94% of active studio orders fit directly with standard seam margins.</p>
+              </div>
+            </div>
+          </div>
+          <div className="widget-footer">
+            <span>Open Size Intelligence Studio</span>
+            <ArrowRight size={13} />
+          </div>
+        </div>
+
+        {/* Widget 3: AI Tailor Assistant Shortcut */}
+        <div className="dash-widget-card ai-assistant-widget">
+          <div className="widget-header">
+            <div className="widget-title-group">
+              <div className="widget-icon-bg purple">
+                <Scissors size={16} />
+              </div>
+              <div>
+                <h4 className="widget-title">AI Tailor Assistant</h4>
+                <span className="widget-sub">Instant Fabric &amp; Sizing Q&amp;A</span>
+              </div>
+            </div>
+            <span className="dash-badge-purple">Floating Chat</span>
+          </div>
+          <div className="widget-body">
+            <p className="dash-widget-desc">
+              Ask questions about fabric calculations, shirt lengths, slim vs regular fit, or waste reduction.
+            </p>
+            <div className="dash-quick-questions">
+              <span className="dash-q-chip" onClick={() => onNavigate('calculator')}>
+                Shirt fabric length?
+              </span>
+              <span className="dash-q-chip" onClick={() => onNavigate('calculator')}>
+                Summer fabrics?
+              </span>
+              <span className="dash-q-chip" onClick={() => onNavigate('calculator')}>
+                Cotton vs Linen
+              </span>
+            </div>
+          </div>
+          <div className="widget-footer">
+            <span>Use Floating Chat Button at bottom right</span>
+            <ArrowRight size={13} />
+          </div>
+        </div>
+      </section>
+
       {/* ── Split Section: Popular Garments & AI Tailoring Tips ── */}
       <div className="dashboard-mid-split">
         {/* Popular Dress Types */}

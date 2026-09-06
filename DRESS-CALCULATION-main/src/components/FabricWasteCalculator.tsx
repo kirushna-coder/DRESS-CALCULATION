@@ -20,6 +20,7 @@ import {
 import type { DressType, FabricType, Measurements, ActiveTab } from '../types';
 import { calculateFabricRequirement } from '../calculations/fabricCalculator';
 import { DRESS_TYPE_INFO, FABRICS } from '../utils/demoData';
+import SmartFabricRecommendation from './SmartFabricRecommendation';
 
 interface FabricWasteCalculatorProps {
   currentDressType: DressType;
@@ -331,6 +332,17 @@ const FabricWasteCalculator: React.FC<FabricWasteCalculatorProps> = ({
               <span>Calculate Price Estimate</span>
               <ArrowRight size={16} />
             </button>
+          </div>
+
+          {/* Smart Fabric Recommendation Section */}
+          <div className="mt-4">
+            <SmartFabricRecommendation
+              dressType={selectedDress}
+              measurements={{ ...currentMeasurements, fullLength: lengthInput, flare: flareInput }}
+              selectedFabric={selectedFabric}
+              onSelectFabric={setSelectedFabric}
+              currency="INR"
+            />
           </div>
         </div>
       </div>

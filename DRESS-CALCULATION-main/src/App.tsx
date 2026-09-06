@@ -22,6 +22,9 @@ import OrdersManager from './components/OrdersManager';
 import CustomerDirectory from './components/CustomerDirectory';
 import CADStudio from './components/CADStudio';
 import SmartSizeStudio from './components/SmartSizeStudio';
+import AITailorAssistant from './components/AITailorAssistant';
+import FitConfidenceCard from './components/FitConfidenceCard';
+import SmartFabricRecommendation from './components/SmartFabricRecommendation';
 
 // Hooks & Utils
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -358,7 +361,7 @@ const App: React.FC = () => {
               />
             </div>
 
-            {/* Right Column: Garment Visualizer + AI Card + Fabric Summary */}
+            {/* Right Column: Garment Visualizer + AI Card + Fit Confidence + Smart Fabric Rec + Fabric Summary */}
             <div className="calc-right-col">
               <DressPreview2D
                 dressType={dressType}
@@ -366,6 +369,22 @@ const App: React.FC = () => {
                 color={fabricColor}
                 onColorChange={setFabricColor}
                 measurements={measurements}
+              />
+
+              <FitConfidenceCard
+                measurements={measurements}
+                dressType={dressType}
+                onApplyEase={(ease) =>
+                  setMeasurements((prev) => ({ ...prev, ease }))
+                }
+              />
+
+              <SmartFabricRecommendation
+                dressType={dressType}
+                measurements={measurements}
+                selectedFabric={fabricType}
+                onSelectFabric={handleFabricSelect}
+                currency={currency}
               />
 
               <AIRecommendationCard
@@ -494,6 +513,14 @@ const App: React.FC = () => {
         orderNumber={invoiceOrderSnapshot?.orderNumber}
         orderDate={invoiceOrderSnapshot?.orderDate}
         dueDate={invoiceOrderSnapshot?.deliveryDueDate}
+      />
+
+      {/* ── Global Floating AI Tailor Assistant ─────────── */}
+      <AITailorAssistant
+        measurements={measurements}
+        currentDressType={dressType}
+        currentFabricType={fabricType}
+        onNavigateTab={setActiveTab}
       />
     </div>
   );

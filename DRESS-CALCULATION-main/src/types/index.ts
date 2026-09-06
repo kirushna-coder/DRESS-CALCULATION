@@ -103,6 +103,7 @@ export type FabricType =
   | 'POLYESTER'
   | 'LINEN'
   | 'DENIM'
+  | 'RAYON'
   | 'GEORGETTE'
   | 'VELVET'
   | 'WOOL';

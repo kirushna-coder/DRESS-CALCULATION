@@ -87,6 +87,17 @@ export const FABRICS: Record<FabricType, FabricDetails> = {
     suitableFor: ['FROCK', 'BLOUSE', 'SKIRT', 'TSHIRT'],
     shrinkagePercent: 0.5,
   },
+  RAYON: {
+    id: 'RAYON',
+    name: 'Soft Viscose Rayon',
+    description: 'Silky smooth drape with high breathability, ideal for summer frocks and skirts.',
+    defaultPricePerMeter: 240,
+    standardWidthInches: 44,
+    drape: 'Fluid',
+    breathability: 'High',
+    suitableFor: ['FROCK', 'SKIRT', 'BLOUSE', 'KURTA'],
+    shrinkagePercent: 3,
+  },
   GEORGETTE: {
     id: 'GEORGETTE',
     name: 'Viscose Georgette Chiffon',
