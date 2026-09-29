@@ -25,15 +25,58 @@ export interface Measurements {
   height?: number; // cm or in
   weight?: number; // kg or lbs
   sleeveLength?: number;
+  sleeveType?: 'Short Sleeve' | 'Long Sleeve' | '3/4 Sleeve' | 'Sleeveless';
   bicepCircumference?: number;
   crossBack?: number;
   inseam?: number;
   outseam?: number;
   thighCircumference?: number;
+  kneeCircumference?: number;
+  ankleCircumference?: number;
   notes?: string;
 }
 
 export type Gender = 'male' | 'female' | 'unisex' | 'kids';
+
+/** Advanced Pant Design Parameters */
+export type PantStyle = 'formal' | 'straight' | 'slim' | 'jeans';
+export type PantFit = 'slim' | 'regular' | 'relaxed';
+export type PantPocketStyle = 'slant' | 'side' | 'welt' | 'patch';
+export type PantPleats = 'none' | 'single' | 'double';
+export type PantHemStyle = 'straight' | 'tapered' | 'bootcut' | 'cuffed';
+
+export interface PantOptions {
+  style: PantStyle;
+  fit: PantFit;
+  pockets: PantPocketStyle;
+  pleats: PantPleats;
+  hem: PantHemStyle;
+  flyZipper: boolean;
+  waistbandWidth: number; // inches
+}
+
+export type SeamAllowanceCm = 0 | 0.5 | 1 | 1.5;
+
+export type PDFPaperSize = 'A4' | 'A3' | 'A0';
+export type PDFExportScale = 'fit' | '1:1' | '1:2' | '1:4';
+
+export interface SeamMismatchWarning {
+  seamName: string;
+  frontLength: number; // in inches
+  backLength: number;  // in inches
+  difference: number;  // in inches
+  severity: 'info' | 'warning' | 'error';
+  message: string;
+  suggestion: string;
+}
+
+export interface FitValidationResult {
+  isValid: boolean;
+  missingFields: string[];
+  mismatches: SeamMismatchWarning[];
+  dimensionWarnings: string[];
+  overallConfidence: number; // 0 to 100
+}
 
 /** A 2-D point in SVG space */
 export interface Point {
@@ -64,6 +107,21 @@ export interface ConstructionLine {
   dashed?: boolean;
 }
 
+/** A single named pattern piece rendered with its own color, label and grainline */
+export interface PatternPiece {
+  id: string;
+  label: string;
+  subLabel?: string;
+  path: string;
+  fillTint: string;
+  strokeColor: string;
+  grainCx?: number;
+  grainCy?: number;
+  grainLen?: number;
+  labelCx?: number;
+  labelCy?: number;
+}
+
 /** Full output of the pattern drafting calculation engine */
 export interface PatternData {
   /** Ordered SVG path data string for the dress outline */
@@ -76,6 +134,8 @@ export interface PatternData {
   annotations: MeasurementAnnotation[];
   /** Bounding box of the pattern in SVG units */
   bounds: { width: number; height: number };
+  /** Multi-piece rendering data (when present, overrides outlinePath rendering) */
+  pieces?: PatternPiece[];
 }
 
 /** Supported pattern/garment types */
@@ -87,7 +147,9 @@ export type DressType =
   | 'BLOUSE'
   | 'CHUDIDAR'
   | 'FROCK'
-  | 'SKIRT';
+  | 'SKIRT'
+  | 'JACKET'
+  | 'TOP';
 
 // Backward compatibility alias
 export type PatternType = DressType | 'ONE_PIECE' | 'KURTI' | 'KIDS';
@@ -116,6 +178,9 @@ export interface FabricDetails {
   standardWidthInches: number; // e.g. 44" or 58"
   drape: 'Crisp' | 'Soft' | 'Heavy' | 'Fluid' | 'Structured';
   breathability: 'High' | 'Medium' | 'Low';
+  stretchLevel: 'Low' | 'Medium' | 'High';
+  comfortLevel: 'High' | 'Medium' | 'Premium';
+  recommendedUse: string;
   suitableFor: DressType[];
   shrinkagePercent: number;
 }

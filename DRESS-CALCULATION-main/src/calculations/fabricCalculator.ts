@@ -150,8 +150,9 @@ export function calculateFabricRequirement(
       const bodiceLength = 15;
       const skirtLength = Math.max(20, lengthInches - bodiceLength);
       const flareMultiplier = flareInches > 6 ? 2.5 : 2.0;
+      const sleeveMult = m.sleeveType === 'Sleeveless' ? 0 : m.sleeveType === 'Short Sleeve' ? 0.5 : 1.0;
 
-      totalInchesNeeded = bodiceLength * 2 + skirtLength * flareMultiplier + sleeveInches + 10;
+      totalInchesNeeded = bodiceLength * 2 + skirtLength * flareMultiplier + sleeveInches * sleeveMult + 10;
       layoutSuggestion = 'Radial umbrella / A-line panel cutting with bodice nested at top grain.';
       wasteEstimate = 11;
       break;
@@ -162,6 +163,27 @@ export function calculateFabricRequirement(
       totalInchesNeeded = lengthInches * skirtFlareMultiplier + 8;
       layoutSuggestion = 'A-line 6-panel or circular umbrella cut with waistband on grain.';
       wasteEstimate = 9;
+      break;
+    }
+
+    case 'JACKET': {
+      const sleeveMult = m.sleeveType === 'Sleeveless' ? 0 : m.sleeveType === 'Short Sleeve' ? 0.5 : 1.0;
+      totalInchesNeeded = lengthInches * 2 + sleeveInches * sleeveMult + 14;
+      layoutSuggestion = 'Heavy tailored lay with canvas interlining and split back seam for jacket structure.';
+      wasteEstimate = 10;
+      break;
+    }
+
+    case 'TOP': {
+      const sleeveMult = m.sleeveType === 'Sleeveless' ? 0 : m.sleeveType === 'Short Sleeve' ? 0.5 : 1.0;
+      if (isWideFabric) {
+        totalInchesNeeded = lengthInches + sleeveInches * sleeveMult + 6;
+        layoutSuggestion = 'Cross-wise fold with neck facing on selvage trim.';
+      } else {
+        totalInchesNeeded = lengthInches * 2 + sleeveInches * sleeveMult + 8;
+        layoutSuggestion = 'Two body lengths stacked with sleeves alongside.';
+      }
+      wasteEstimate = 6;
       break;
     }
 

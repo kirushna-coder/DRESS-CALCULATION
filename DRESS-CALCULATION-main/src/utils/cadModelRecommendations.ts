@@ -125,6 +125,22 @@ export const dressMaterialData: Record<PatternType, {
     colourOptions: ['Sky Blue', 'Blush Rose', 'Sage Olive', 'Ivory White'],
     previewType: 'kids',
   },
+  JACKET: {
+    dressName: 'Structured Jacket',
+    recommendedMaterials: ['Wool Blend', 'Cotton Twill', 'Linen'],
+    defaultMaterial: 'Wool Blend',
+    fabricRequirement: '2.5 to 3.5 meters',
+    colourOptions: ['Charcoal Black', 'Royal Navy', 'Camel Brown', 'Ivory White'],
+    previewType: 'jacket',
+  },
+  TOP: {
+    dressName: 'Casual Top',
+    recommendedMaterials: ['Cotton', 'Rayon', 'Georgette'],
+    defaultMaterial: 'Cotton',
+    fabricRequirement: '1.5 to 2 meters',
+    colourOptions: ['Blush Rose', 'Sky Blue', 'Ivory White', 'Sage Olive'],
+    previewType: 'top',
+  },
 };
 
 export const CAD_MODEL_SPECS: Record<string, CADModelSpecification> = {

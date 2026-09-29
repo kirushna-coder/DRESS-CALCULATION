@@ -12,15 +12,18 @@
 // padding area.  All Y values increase downward.
 // ============================================================
 
-import type { Measurements, PatternData, PatternPoint, Point } from '../types';
+import type { ConstructionLine, MeasurementAnnotation, Measurements, PatternData, PatternPoint, Point } from '../types';
+import {
+  createFrontNecklineSegment,
+  createBackNecklineSegment,
+  createArmholePathSegment,
+  createSleeveCapPathSegments,
+} from '../utils/curveUtils';
+
 
 // ─── Helper: convert inches → SVG pixels ────────────────────
 const px = (inches: number, scale: number) => inches * scale;
 
-// ─── Helper: quadratic Bezier midpoint ──────────────────────
-// Returns the SVG Q (quadratic) path segment string
-const qBez = (cx: number, cy: number, ex: number, ey: number) =>
-  `Q ${cx} ${cy} ${ex} ${ey}`;
 
 // ─── Helper: cubic Bezier ────────────────────────────────────
 const cBez = (
@@ -93,197 +96,223 @@ export function calculateOnePieceDress(
   scale: number
 ): PatternData {
   // ── Step 1: Derived measurements (inches) ─────────────────
-  const halfBust         = (m.bust + m.ease) / 4;  // quarter-bust (half-panel is 1/4 of full)
-  const halfWaist        = (m.waist + m.ease) / 4;
-  const halfHip          = (m.hip + m.ease) / 4;
-  const halfBottom       = m.bottomWidth / 2;
-  const halfNeck         = m.neckWidth / 2;
-  const halfShoulder     = m.shoulderWidth;          // shoulder width already is half panel width
+  const halfBust     = (m.bust + (m.ease || 1)) / 4;
+  const halfWaist    = (m.waist + (m.ease || 1)) / 4;
+  const halfBottom   = (m.bottomWidth || 20) / 2;
+  const halfNeck     = (m.neckWidth || 3) / 2;
+  const halfShoulder = (m.shoulderWidth || 3.2);
 
-  // Vertical section heights (inches)
-  const bustLineY        = m.armholeDepth;
-  const hipLineY         = m.armholeDepth + 8;        // hip is ~8 in below bust on standard block
-  const totalLength      = m.fullLength;
+  const armDepth     = m.armholeDepth || 6.5;
+  const neckDepth    = m.neckDepth || 2.2;
+  const totalLength  = m.fullLength || 54;
+  const bodiceLength = Math.min(16, Math.max(12, armDepth + 7));
+  const skirtLength  = Math.max(20, totalLength - bodiceLength);
+  const sleeveLen    = m.sleeveLength || 8;
+  const sleeveWidth  = Math.max(7, armDepth * 1.1);
 
-  // ── Step 2: Convert to SVG pixels ─────────────────────────
-  // ORIGIN = top-left of the drawing area
-  const MARGIN = px(1, scale);   // 1-inch margin from canvas edge
+  const gap = px(3, scale);
+  const originX = 36;
+  const originY = 30;
 
-  const originX = MARGIN;
-  const originY = MARGIN;
+  // ── PIECE 1: FRONT BODICE ─────────────────────────────────
+  const fX0 = originX;
+  const fY0 = originY;
 
-  // Key X coordinates (half-panel, width increases right → left for a front panel)
-  // We draw the CENTER FOLD on the LEFT edge (x = originX)
-  // and the SIDE SEAM on the RIGHT edge.
+  const fCF_x   = fX0;
+  const fNeck_x = fCF_x + px(halfNeck, scale);
+  const fSh_x   = fCF_x + px(halfShoulder, scale);
+  const fBust_x = fCF_x + px(halfBust, scale);
+  const fWaist_x= fCF_x + px(halfWaist, scale);
 
-  const xCF   = originX;                        // Centre Front fold line
-  const xNeck = xCF + px(halfNeck, scale);      // Neck point
-  const xSh   = xCF + px(halfShoulder, scale);  // Shoulder tip
-  const xBust = xCF + px(halfBust, scale);      // Bust / side seam at bust
-  const xWaist= xCF + px(halfWaist, scale);     // Waist side seam
-  const xHip  = xCF + px(halfHip, scale);       // Hip side seam
-  const xBot  = xCF + px(halfBottom, scale);    // Bottom hem side point
+  const yTop       = fY0;
+  const yNeckDip   = fY0 + px(neckDepth, scale);
+  const yShSlope   = fY0 + px(0.75, scale);
+  const yArmhole   = fY0 + px(armDepth, scale);
+  const yBodiceWaist= fY0 + px(bodiceLength, scale);
 
-  // Key Y coordinates
-  const yTop       = originY;                           // A – top / shoulder-neck junction
-  const yNeckDip   = originY + px(m.neckDepth, scale);  // B – bottom of neckline curve
-  const yArmhole   = originY + px(bustLineY, scale);    // C – armhole / bust line
-  const yShldrSlope= originY + px(0.75, scale);         // slight shoulder slope (~0.75 in)
-  const yHip       = originY + px(hipLineY, scale);     // D – hip line
-  const yHem       = originY + px(totalLength, scale);  // E – hem / bottom
+  const fA: Point = { x: fCF_x,    y: yNeckDip };
+  const fB: Point = { x: fNeck_x,  y: yTop };
+  const fC: Point = { x: fSh_x,    y: yShSlope };
+  const fD: Point = { x: fBust_x,  y: yArmhole };
+  const fE: Point = { x: fWaist_x, y: yBodiceWaist };
+  const fF: Point = { x: fCF_x,    y: yBodiceWaist };
 
-  // ── Step 3: Named pattern points ──────────────────────────
-  // (standard dressmaking notation)
-
-  const A: Point = { x: xCF,   y: yTop };          // Centre-front neck top
-  const B: Point = { x: xNeck, y: yTop };           // Shoulder-neck point
-  const C: Point = { x: xSh,   y: yShldrSlope };   // Shoulder tip
-  const D: Point = { x: xBust, y: yArmhole };       // Bust / underarm point
-  const E: Point = { x: xWaist,y: yArmhole + px(4, scale) }; // Waist side seam (4 in below armhole typically)
-  const F: Point = { x: xHip,  y: yHip };           // Hip side seam
-  const G: Point = { x: xBot,  y: yHem };           // Bottom hem, side point
-  const H: Point = { x: xCF,   y: yHem };           // Bottom hem, centre fold
-  // (Point I – CF at bust height – not rendered; retained here as a reference comment)
-  // const I: Point = { x: xCF, y: yArmhole };
-
-  // Neckline curve control point
-  const neckCtrlX = xCF + px(halfNeck * 0.5, scale);
-  const neckCtrlY = yNeckDip;
-
-  // Armhole curve control points
-  const ahCtrl1X = xSh + px(0.5, scale);
-  const ahCtrl1Y = yShldrSlope + px(m.armholeDepth * 0.4, scale);
-  const ahCtrl2X = xBust + px(0.5, scale);
-  const ahCtrl2Y = yArmhole - px(1.5, scale);
-
-  // Bottom flare curve control points
-  const flareOffsetPx = px(m.flare, scale);
-  const botCtrl1X = xBot + flareOffsetPx * 0.5;
-  const botCtrl1Y = yHip + (yHem - yHip) * 0.3;
-  const botCtrl2X = xBot + flareOffsetPx;
-  const botCtrl2Y = yHem - px(2, scale);
-
-  // ── Step 4: Build SVG path (clockwise) ───────────────────
-  //
-  // Path order:
-  //   A (CF top) → neck curve → B (neck-shoulder) → C (shoulder tip)
-  //   → armhole curve → D (underarm) → waist dart approximation
-  //   → E (waist) → F (hip) → bottom flare → G (hem side)
-  //   → H (hem CF) → straight up CF → A
-  //
-
-  const outline = [
-    // Start at centre-front neck top
-    `M ${A.x} ${A.y}`,
-    // Neckline: quadratic curve from A to B using control point below
-    qBez(neckCtrlX, neckCtrlY, B.x, B.y),
-    // Shoulder seam: line from B to C (slight slope)
-    `L ${C.x} ${C.y}`,
-    // Armhole curve: cubic bezier from C to D
-    cBez(ahCtrl1X, ahCtrl1Y, ahCtrl2X, ahCtrl2Y, D.x, D.y),
-    // Side seam: D → E (waist) → F (hip) – slight curves for body shape
-    qBez(
-      D.x + px(0.3, scale), D.y + (E.y - D.y) * 0.5,
-      E.x, E.y
-    ),
-    qBez(
-      E.x + px(0.2, scale), E.y + (F.y - E.y) * 0.5,
-      F.x, F.y
-    ),
-    // Hip to hem with flare
-    cBez(botCtrl1X, botCtrl1Y, botCtrl2X, botCtrl2Y, G.x, G.y),
-    // Hem: straight from G to H (CF)
-    `L ${H.x} ${H.y}`,
-    // Centre-front seam: straight up from H to A
-    `L ${A.x} ${A.y}`,
-    `Z`,
+  const frontBodicePath = [
+    `M ${fA.x} ${fA.y}`,
+    createFrontNecklineSegment(fCF_x, yNeckDip, fNeck_x, yTop),
+    `L ${fC.x} ${fC.y}`,
+    createArmholePathSegment(fSh_x, yShSlope, fBust_x, yArmhole, px(armDepth, scale), true),
+    cBez(fBust_x - px(0.3, scale), yArmhole + (yBodiceWaist - yArmhole) * 0.4, fWaist_x + px(0.15, scale), yArmhole + (yBodiceWaist - yArmhole) * 0.75, fE.x, fE.y),
+    `L ${fF.x} ${fF.y}`,
+    `L ${fA.x} ${fA.y}`,
+    'Z',
   ].join(' ');
 
-  // ── Step 5: Construction lines ────────────────────────────
-  const constructionLines = [
-    // Bust line (horizontal)
-    { from: { x: xCF, y: yArmhole }, to: { x: xBust + px(1, scale), y: yArmhole }, dashed: true },
-    // Hip line (horizontal)
-    { from: { x: xCF, y: yHip }, to: { x: xHip + px(1, scale), y: yHip }, dashed: true },
-    // Centre-front vertical guide
-    { from: A, to: H, dashed: true },
-    // Shoulder guide
-    { from: { x: xCF, y: yTop }, to: { x: xSh + px(0.5, scale), y: yTop }, dashed: true },
+  // ── PIECE 2: BACK BODICE ──────────────────────────────────
+  const bX0 = fX0 + px(halfBust, scale) + gap;
+  const bY0 = originY;
+
+  const bCB_x   = bX0;
+  const bNeck_x = bCB_x + px(halfNeck, scale);
+  const bSh_x   = bCB_x + px(halfShoulder, scale);
+  const bBust_x = bCB_x + px(halfBust, scale);
+  const bWaist_x= bCB_x + px(halfWaist, scale);
+
+  const bA: Point = { x: bCB_x,    y: yTop + px(1.0, scale) };
+  const bC: Point = { x: bSh_x,    y: yShSlope };
+  const bE: Point = { x: bWaist_x, y: yBodiceWaist };
+  const bF: Point = { x: bCB_x,    y: yBodiceWaist };
+
+  const backBodicePath = [
+    `M ${bA.x} ${bA.y}`,
+    createBackNecklineSegment(bCB_x, bA.y, bNeck_x, yTop),
+    `L ${bC.x} ${bC.y}`,
+    createArmholePathSegment(bSh_x, yShSlope, bBust_x, yArmhole, px(armDepth, scale), false),
+    cBez(bBust_x - px(0.3, scale), yArmhole + (yBodiceWaist - yArmhole) * 0.4, bWaist_x + px(0.15, scale), yArmhole + (yBodiceWaist - yArmhole) * 0.75, bE.x, bE.y),
+    `L ${bF.x} ${bF.y}`,
+    `L ${bA.x} ${bA.y}`,
+    'Z',
+  ].join(' ');
+
+  // ── PIECE 3: SLEEVE ───────────────────────────────────────
+  const slX0 = bX0 + px(halfBust, scale) + gap;
+  const slY0 = originY;
+
+  const slWidth = px(sleeveWidth * 2, scale);
+  const slCapH  = px(armDepth * 0.6, scale);
+  const slLen   = px(sleeveLen, scale);
+  const slMidX  = slX0 + slWidth / 2;
+
+  const onePieceCaps = createSleeveCapPathSegments(slX0, slY0 + slCapH, slMidX, slY0, slX0 + slWidth, slY0 + slCapH, slCapH);
+
+  const sleevePath = [
+    `M ${slX0} ${slY0 + slCapH}`, // underarm start
+    onePieceCaps.leftCap,
+    onePieceCaps.rightCap,
+    `L ${slX0 + slWidth * 0.85} ${slY0 + slLen}`,
+    `L ${slX0 + slWidth * 0.15} ${slY0 + slLen}`,
+    `L ${slX0} ${slY0 + slCapH}`,
+    'Z',
+  ].join(' ');
+
+  // ── PIECE 4: SKIRT PANEL ──────────────────────────────────
+  const skX0 = originX;
+  const skY0 = fY0 + px(bodiceLength, scale) + gap;
+
+  const skWaistW = px(halfWaist * 2, scale);
+  const skHemW   = px(halfBottom * 2 + (m.flare || 4) * 2, scale);
+  const skLen    = px(skirtLength, scale);
+  const skMidX   = skX0 + skHemW / 2;
+
+  const skTopLeft: Point  = { x: skMidX - skWaistW / 2, y: skY0 };
+  const skTopRight: Point = { x: skMidX + skWaistW / 2, y: skY0 };
+  const skHemRight: Point = { x: skX0 + skHemW,         y: skY0 + skLen };
+  const skHemLeft: Point  = { x: skX0,                  y: skY0 + skLen };
+
+  const skirtPath = [
+    `M ${skTopLeft.x} ${skTopLeft.y}`,
+    cBez(skTopLeft.x + skWaistW * 0.3, skY0 - px(0.7, scale), skTopRight.x - skWaistW * 0.3, skY0 - px(0.7, scale), skTopRight.x, skTopRight.y),
+    cBez(skTopRight.x + px(1.5, scale), skY0 + skLen * 0.35, skHemRight.x + px(1.0, scale), skY0 + skLen * 0.6, skHemRight.x, skHemRight.y),
+    cBez(skHemRight.x - skHemW * 0.3, skY0 + skLen + px(2.0, scale), skHemLeft.x + skHemW * 0.3, skY0 + skLen + px(2.0, scale), skHemLeft.x, skHemLeft.y),
+    cBez(skHemLeft.x - px(1.0, scale), skY0 + skLen * 0.6, skTopLeft.x - px(1.5, scale), skY0 + skLen * 0.35, skTopLeft.x, skTopLeft.y),
+    'Z',
+  ].join(' ');
+
+  // ── COMBINED PATH & PIECES ARRAY ──────────────────────────
+  const outline = [frontBodicePath, backBodicePath, sleevePath, skirtPath].join(' ');
+
+  const pieces: PatternData['pieces'] = [
+    {
+      id: 'front_bodice',
+      label: 'FRONT BODICE',
+      subLabel: '(Cut 1 on fold)',
+      path: frontBodicePath,
+      fillTint: 'rgba(79, 70, 229, 0.08)',
+      strokeColor: '#4F46E5',
+      labelCx: fCF_x + px(halfBust * 0.5, scale),
+      labelCy: fY0 + px(bodiceLength * 0.5, scale),
+      grainCx: fCF_x + px(halfBust * 0.5, scale),
+      grainCy: fY0 + px(bodiceLength * 0.65, scale),
+      grainLen: px(4, scale),
+    },
+    {
+      id: 'back_bodice',
+      label: 'BACK BODICE',
+      subLabel: '(Cut 1 on fold)',
+      path: backBodicePath,
+      fillTint: 'rgba(16, 185, 129, 0.08)',
+      strokeColor: '#059669',
+      labelCx: bCB_x + px(halfBust * 0.5, scale),
+      labelCy: bY0 + px(bodiceLength * 0.5, scale),
+      grainCx: bCB_x + px(halfBust * 0.5, scale),
+      grainCy: bY0 + px(bodiceLength * 0.65, scale),
+      grainLen: px(4, scale),
+    },
+    {
+      id: 'sleeve',
+      label: 'SLEEVE',
+      subLabel: '(Cut 2 pair)',
+      path: sleevePath,
+      fillTint: 'rgba(217, 119, 6, 0.08)',
+      strokeColor: '#D97706',
+      labelCx: slMidX,
+      labelCy: slY0 + slCapH + px(2, scale),
+      grainCx: slMidX,
+      grainCy: slY0 + slCapH + px(4, scale),
+      grainLen: px(3.5, scale),
+    },
+    {
+      id: 'skirt_panel',
+      label: 'SKIRT PANEL (FLARED)',
+      subLabel: '(Cut 2 front/back)',
+      path: skirtPath,
+      fillTint: 'rgba(220, 38, 38, 0.08)',
+      strokeColor: '#DC2626',
+      labelCx: skMidX,
+      labelCy: skY0 + skLen * 0.4,
+      grainCx: skMidX,
+      grainCy: skY0 + skLen * 0.6,
+      grainLen: px(6, scale),
+    },
   ];
 
-  // ── Step 6: Annotation arrows ─────────────────────────────
-  const annotOff = px(0.6, scale); // default arrow offset
-
-  const annotations = [
-    // Full length
-    {
-      from: { x: xCF - annotOff * 2, y: yTop },
-      to:   { x: xCF - annotOff * 2, y: yHem },
-      label: `${m.fullLength}"`,
-      direction: 'vertical' as const,
-    },
-    // Shoulder width
-    {
-      from: { x: xCF, y: yTop - annotOff * 2 },
-      to:   { x: xSh, y: yTop - annotOff * 2 },
-      label: `${m.shoulderWidth}"`,
-      direction: 'horizontal' as const,
-    },
-    // Neck width
-    {
-      from: { x: xCF, y: yTop - annotOff },
-      to:   { x: xNeck, y: yTop - annotOff },
-      label: `${m.neckWidth / 2}"`,
-      direction: 'horizontal' as const,
-    },
-    // Armhole depth
-    {
-      from: { x: xSh + annotOff * 2, y: yTop },
-      to:   { x: xSh + annotOff * 2, y: yArmhole },
-      label: `${m.armholeDepth}"`,
-      direction: 'vertical' as const,
-    },
-    // Bust width (half panel)
-    {
-      from: { x: xCF, y: yArmhole + annotOff },
-      to:   { x: xBust, y: yArmhole + annotOff },
-      label: `${halfBust.toFixed(1)}"`,
-      direction: 'horizontal' as const,
-    },
-    // Hip width
-    {
-      from: { x: xCF, y: yHip + annotOff },
-      to:   { x: xHip, y: yHip + annotOff },
-      label: `${halfHip.toFixed(1)}"`,
-      direction: 'horizontal' as const,
-    },
-    // Bottom width
-    {
-      from: { x: xCF, y: yHem + annotOff },
-      to:   { x: xBot, y: yHem + annotOff },
-      label: `${halfBottom}"`,
-      direction: 'horizontal' as const,
-    },
-  ];
-
-  // ── Step 7: Named point list for labels ───────────────────
+  // ── POINTS FOR LABELS ─────────────────────────────────────
   const points: PatternPoint[] = [
-    { label: 'A', point: A, description: 'CF Neck Top' },
-    { label: 'B', point: B, description: 'Neck–Shoulder' },
-    { label: 'C', point: C, description: 'Shoulder Tip' },
-    { label: 'D', point: D, description: 'Underarm / Bust' },
-    { label: 'E', point: E, description: 'Waist Side' },
-    { label: 'F', point: F, description: 'Hip Side' },
-    { label: 'G', point: G, description: 'Hem Side' },
-    { label: 'H', point: H, description: 'Hem CF' },
+    { label: 'F-A', point: fA, description: 'Front CF neck top' },
+    { label: 'F-B', point: fB, description: 'Front neck width' },
+    { label: 'F-C', point: fC, description: 'Front shoulder tip' },
+    { label: 'F-D', point: fD, description: 'Front underarm' },
+    { label: 'F-E', point: fE, description: 'Front waist side' },
+    { label: 'B-A', point: bA, description: 'Back CB neck top' },
+    { label: 'B-C', point: bC, description: 'Back shoulder tip' },
+    { label: 'S-A', point: { x: slMidX, y: slY0 }, description: 'Sleeve cap apex' },
+    { label: 'K-A', point: skTopLeft, description: 'Skirt waist corner' },
+    { label: 'K-B', point: skHemRight, description: 'Skirt hem flare corner' },
   ];
 
-  // ── Step 8: Bounding box ──────────────────────────────────
-  const boundsWidth  = px(halfBottom, scale) + MARGIN * 4 + px(m.flare, scale);
-  const boundsHeight = px(totalLength, scale) + MARGIN * 4;
+  // ── CONSTRUCTION LINES ────────────────────────────────────
+  const constructionLines: ConstructionLine[] = [
+    { from: { x: fCF_x, y: yArmhole }, to: { x: fBust_x, y: yArmhole }, dashed: true },
+    { from: { x: bCB_x, y: yArmhole }, to: { x: bBust_x, y: yArmhole }, dashed: true },
+    { from: { x: skMidX, y: skY0 }, to: { x: skMidX, y: skY0 + skLen }, dashed: true },
+  ];
+
+  // ── MEASUREMENT ANNOTATIONS ───────────────────────────────
+  const margin = px(1.2, scale);
+  const annotations: MeasurementAnnotation[] = [
+    { from: { x: fCF_x - margin, y: fY0 }, to: { x: fCF_x - margin, y: yBodiceWaist }, label: `Bodice: ${bodiceLength}"`, direction: 'vertical' },
+    { from: { x: fCF_x, y: fY0 - margin }, to: { x: fBust_x, y: fY0 - margin }, label: `Bust: ${(halfBust * 4).toFixed(0)}"`, direction: 'horizontal' },
+    { from: { x: skX0 - margin, y: skY0 }, to: { x: skX0 - margin, y: skY0 + skLen }, label: `Skirt: ${skirtLength}"`, direction: 'vertical' },
+    { from: { x: skMidX - skWaistW / 2, y: skY0 - margin }, to: { x: skMidX + skWaistW / 2, y: skY0 - margin }, label: `Waist: ${(halfWaist * 4).toFixed(0)}"`, direction: 'horizontal' },
+  ];
+
+  // ── BOUNDS ────────────────────────────────────────────────
+  const boundsWidth = Math.max(skX0 + skHemW, slX0 + slWidth) + px(4, scale);
+  const boundsHeight = skY0 + skLen + px(4, scale);
 
   return {
     outlinePath: outline,
+    pieces,
     points,
     constructionLines,
     annotations,

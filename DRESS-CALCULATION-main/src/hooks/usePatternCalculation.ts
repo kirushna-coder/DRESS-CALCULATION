@@ -5,13 +5,14 @@
 // ============================================================
 
 import { useState, useEffect, useRef } from 'react';
-import type { Measurements, PatternData, PatternType } from '../types';
-import { PATTERN_REGISTRY } from '../patterns/patternRegistry';
+import type { Measurements, PatternData, PatternType, PantOptions } from '../types';
+import { PATTERN_REGISTRY, calculatePantPattern } from '../patterns/patternRegistry';
 
 export function usePatternCalculation(
   measurements: Measurements,
   scale: number,
-  patternType: PatternType
+  patternType: PatternType,
+  pantOptions?: PantOptions
 ) {
   const [patternData, setPatternData] = useState<PatternData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -23,9 +24,14 @@ export function usePatternCalculation(
 
     timerRef.current = setTimeout(() => {
       try {
-        const def = PATTERN_REGISTRY[patternType];
-        const data = def.calculate(measurements, scale);
-        setPatternData(data);
+        if (patternType === 'PANT') {
+          const data = calculatePantPattern(measurements, scale, pantOptions);
+          setPatternData(data);
+        } else {
+          const def = PATTERN_REGISTRY[patternType];
+          const data = def.calculate(measurements, scale);
+          setPatternData(data);
+        }
         setError(null);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Calculation error');
@@ -35,7 +41,7 @@ export function usePatternCalculation(
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [measurements, scale, patternType]);
+  }, [measurements, scale, patternType, pantOptions]);
 
   return { patternData, error };
 }

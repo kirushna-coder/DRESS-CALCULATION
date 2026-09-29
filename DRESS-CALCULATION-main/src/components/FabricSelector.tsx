@@ -1,5 +1,6 @@
 // ============================================================
-// SmartTailor AI – Fabric Selection & Tailoring Pricing Module
+// SmartTailor AI – Fabric Selection & Analysis Module
+// Material properties, stretch levels, recommended uses, and dynamic matching
 // ============================================================
 
 import React from 'react';
@@ -10,9 +11,11 @@ import {
   DollarSign,
   Plus,
   Zap,
+  Activity,
+  Award,
 } from 'lucide-react';
-import type { FabricType, TailoringAddOns, Currency } from '../types';
-import { FABRICS } from '../utils/demoData';
+import type { FabricType, TailoringAddOns, Currency, DressType } from '../types';
+import { FABRICS, DRESS_TYPE_INFO } from '../utils/demoData';
 
 interface FabricSelectorProps {
   selectedFabric: FabricType;
@@ -24,17 +27,19 @@ interface FabricSelectorProps {
   addOns: TailoringAddOns;
   onAddOnsChange: (addOns: TailoringAddOns) => void;
   currency: Currency;
+  selectedDress?: DressType;
 }
 
 const FABRIC_TYPES_LIST: FabricType[] = [
   'COTTON',
   'SILK',
-  'POLYESTER',
   'LINEN',
   'DENIM',
+  'POLYESTER',
+  'WOOL',
+  'RAYON',
   'GEORGETTE',
   'VELVET',
-  'WOOL',
 ];
 
 const FabricSelector: React.FC<FabricSelectorProps> = ({
@@ -47,6 +52,7 @@ const FabricSelector: React.FC<FabricSelectorProps> = ({
   addOns,
   onAddOnsChange,
   currency,
+  selectedDress = 'SHIRT',
 }) => {
   const currencySymbol =
     currency === 'INR' ? '₹' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '£';
@@ -58,8 +64,12 @@ const FabricSelector: React.FC<FabricSelectorProps> = ({
     });
   };
 
+  const selectedFabricDetails = FABRICS[selectedFabric] || FABRICS.COTTON;
+  const currentDressInfo = DRESS_TYPE_INFO[selectedDress];
+  const isRecommendedForDress = currentDressInfo?.recommendedFabric === selectedFabric;
+
   return (
-    <div className="fabric-selector-card">
+    <div className="fabric-selector-card" id="step-fabric">
       {/* ── Card Header ────────────────────────────────── */}
       <div className="selector-header">
         <div className="selector-title-group">
@@ -67,12 +77,24 @@ const FabricSelector: React.FC<FabricSelectorProps> = ({
             <Tag size={18} />
           </div>
           <div>
-            <h2 className="selector-title">Select Fabric &amp; Tailoring Pricing</h2>
+            <h2 className="selector-title">Select Fabric &amp; Material Analysis</h2>
             <p className="selector-sub">
-              Choose material to factor in shrinkage, width, drape, and cutting efficiency
+              Analyze fabric stretch, drape, breathability, and cutting compatibility
             </p>
           </div>
         </div>
+      </div>
+
+      {/* ── Dynamic Recommended Fabric Banner for Selected Dress ── */}
+      <div className="dynamic-fabric-match-banner">
+        <div className="match-banner-title-wrap">
+          <Sparkles size={14} className="sparkle-amber" />
+          <span>Garment Fabric Match: <strong>{currentDressInfo?.label}</strong></span>
+        </div>
+        <p className="match-banner-text">
+          Recommended primary fabric for {currentDressInfo?.label}: <strong>{currentDressInfo?.recommendedFabric}</strong>.
+          {isRecommendedForDress ? ' (Currently Selected - Perfect Match!)' : ' Select it below for optimal drape.'}
+        </p>
       </div>
 
       {/* ── Fabric Cards Grid ───────────────────────────── */}
@@ -80,11 +102,12 @@ const FabricSelector: React.FC<FabricSelectorProps> = ({
         {FABRIC_TYPES_LIST.map((fKey) => {
           const item = FABRICS[fKey];
           const isSelected = selectedFabric === fKey;
+          const isRec = currentDressInfo?.recommendedFabric === fKey;
 
           return (
             <div
               key={fKey}
-              className={`fabric-card ${isSelected ? 'selected' : ''}`}
+              className={`fabric-card ${isSelected ? 'selected' : ''} ${isRec ? 'recommended' : ''}`}
               onClick={() => {
                 onSelectFabric(fKey);
                 onPriceChange(item.defaultPricePerMeter);
@@ -98,6 +121,12 @@ const FabricSelector: React.FC<FabricSelectorProps> = ({
                 </div>
               )}
 
+              {isRec && (
+                <div className="rec-badge-corner">
+                  <Award size={10} /> Rec
+                </div>
+              )}
+
               <div className="fabric-card-top">
                 <h3 className="fabric-title">{item.name}</h3>
                 <span className="fabric-width-tag">{item.standardWidthInches}" Width</span>
@@ -107,8 +136,11 @@ const FabricSelector: React.FC<FabricSelectorProps> = ({
 
               <div className="fabric-badges-row">
                 <span className="badge-pill drape">{item.drape} Drape</span>
+                <span className="badge-pill stretch">
+                  <Activity size={10} /> Stretch: {item.stretchLevel}
+                </span>
                 <span className="badge-pill breath">
-                  <Sparkles size={11} /> {item.breathability} Breathability
+                  <Sparkles size={10} /> {item.breathability} Air
                 </span>
               </div>
 
@@ -122,6 +154,45 @@ const FabricSelector: React.FC<FabricSelectorProps> = ({
             </div>
           );
         })}
+      </div>
+
+      {/* ── Selected Fabric Detailed Analysis Card ───────── */}
+      <div className="fabric-detailed-analysis-card">
+        <h3 className="analysis-card-title">Fabric Property Analysis: {selectedFabricDetails.name}</h3>
+        <div className="analysis-props-grid">
+          <div className="prop-item">
+            <span className="prop-label">Fabric Name:</span>
+            <span className="prop-val">{selectedFabricDetails.name}</span>
+          </div>
+
+          <div className="prop-item">
+            <span className="prop-label">Stretch Level:</span>
+            <span className={`prop-val stretch-${selectedFabricDetails.stretchLevel.toLowerCase()}`}>
+              {selectedFabricDetails.stretchLevel} Stretch
+            </span>
+          </div>
+
+          <div className="prop-item">
+            <span className="prop-label">Comfort Rating:</span>
+            <span className="prop-val">{selectedFabricDetails.comfortLevel} Comfort</span>
+          </div>
+
+          <div className="prop-item">
+            <span className="prop-label">Recommended Use:</span>
+            <span className="prop-val">{selectedFabricDetails.recommendedUse}</span>
+          </div>
+
+          <div className="prop-item full-width">
+            <span className="prop-label">Suitable Garment Types:</span>
+            <div className="suitable-types-chips">
+              {selectedFabricDetails.suitableFor.map((g) => (
+                <span key={g} className={`suit-chip ${selectedDress === g ? 'active' : ''}`}>
+                  {DRESS_TYPE_INFO[g]?.label || g}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ── Custom Pricing & Tailoring Charges ─────────── */}

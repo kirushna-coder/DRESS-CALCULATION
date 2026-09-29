@@ -3,9 +3,11 @@
 // Renders the SVG pattern with all layers:
 //   1. Grid background
 //   2. Construction (guide) lines
-//   3. Dress outline path
+//   3. Dress outline path(s) — supports compound paths for PANT
 //   4. Measurement annotations
 //   5. Named point labels
+//   6. [PANT] Piece title labels, grainline arrows
+//   7. [PANT] Optional seam allowance offset overlay
 // Supports panning via mouse drag.
 // ============================================================
 
@@ -24,12 +26,70 @@ interface PatternCanvasProps {
   error: string | null;
   isLoading?: boolean;
   patternType?: PatternType;
+  seamAllowance?: number; // in pixels; 0 = off
 }
 
 const GRID_SIZE = 20; // px between grid dots
 
+// ── Grainline Arrow helper ──────────────────────────────────
+// Renders a double-headed grainline arrow at (cx, cy) of given length (vertical)
+const GrainLine: React.FC<{ cx: number; cy: number; len: number; label: string }> = ({
+  cx, cy, len, label,
+}) => {
+  const hy = len / 2;
+  const arrowSize = 6;
+  return (
+    <g>
+      {/* shaft */}
+      <line x1={cx} y1={cy - hy} x2={cx} y2={cy + hy} stroke="#6C63FF" strokeWidth={1.2} />
+      {/* top arrow */}
+      <polyline
+        points={`${cx - arrowSize / 2},${cy - hy + arrowSize} ${cx},${cy - hy} ${cx + arrowSize / 2},${cy - hy + arrowSize}`}
+        fill="none" stroke="#6C63FF" strokeWidth={1.2} strokeLinejoin="round"
+      />
+      {/* bottom arrow */}
+      <polyline
+        points={`${cx - arrowSize / 2},${cy + hy - arrowSize} ${cx},${cy + hy} ${cx + arrowSize / 2},${cy + hy - arrowSize}`}
+        fill="none" stroke="#6C63FF" strokeWidth={1.2} strokeLinejoin="round"
+      />
+      {/* label */}
+      <text
+        x={cx + 9} y={cy + 4}
+        fontSize={8} fill="#6C63FF" fontFamily="Inter, sans-serif"
+        fontStyle="italic"
+      >
+        {label}
+      </text>
+    </g>
+  );
+};
+
+// ── Piece title badge ──────────────────────────────────────
+const PieceLabel: React.FC<{ x: number; y: number; text: string; sub?: string }> = ({
+  x, y, text, sub,
+}) => (
+  <g>
+    <text
+      x={x} y={y}
+      fontSize={11} fontWeight="700" fill="#1E293B"
+      fontFamily="Inter, sans-serif" textAnchor="middle"
+    >
+      {text}
+    </text>
+    {sub && (
+      <text
+        x={x} y={y + 14}
+        fontSize={8} fill="#64748B"
+        fontFamily="Inter, sans-serif" textAnchor="middle"
+      >
+        {sub}
+      </text>
+    )}
+  </g>
+);
+
 const PatternCanvas = forwardRef<PatternCanvasHandle, PatternCanvasProps>(
-  ({ patternData, scale, error, isLoading, patternType }, ref) => {
+  ({ patternData, scale, error, isLoading, patternType, seamAllowance = 0 }, ref) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -81,6 +141,15 @@ const PatternCanvas = forwardRef<PatternCanvasHandle, PatternCanvasProps>(
     const svgW = bounds.width + 120;   // extra space for right-side annotations
     const svgH = bounds.height + 40;
 
+    const isPant = patternType === 'PANT';
+
+    // ── PANT-specific piece geometry (computed from scale) ────
+    // These match the layout geometry in calculatePantPattern:
+    const fX0 = 36;
+    const fY0 = 40;
+    const outseamLen   = 40;  // fallback; actual comes from pattern data via annotations
+    const inseamLen    = 30;
+
     return (
       <div
         className={`canvas-wrapper${isPanning ? ' panning' : ''}`}
@@ -125,31 +194,90 @@ const PatternCanvas = forwardRef<PatternCanvasHandle, PatternCanvasProps>(
                 y1={line.from.y}
                 x2={line.to.x}
                 y2={line.to.y}
-                stroke="#CBD5E1"
-                strokeWidth={0.8}
+                stroke={line.dashed ? '#CBD5E1' : '#94A3B8'}
+                strokeWidth={line.dashed ? 0.8 : 1}
                 strokeDasharray={line.dashed ? '4 3' : undefined}
               />
             ))}
           </g>
 
-          {/* ── Dress Outline ────────────────────────────── */}
+          {/* ── Dress Outline / Multi-Piece Shapes ─────────── */}
           <g className="dress-outline">
-            {/* Subtle fill for the dress body */}
-            <path
-              d={outlinePath}
-              fill="rgba(108,99,255,0.05)"
-              stroke="none"
-            />
-            {/* Main outline */}
-            <path
-              d={outlinePath}
-              fill="none"
-              stroke="#1E293B"
-              strokeWidth={2}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
+            {patternData.pieces && patternData.pieces.length > 0 ? (
+              patternData.pieces.map((piece) => (
+                <g key={piece.id}>
+                  <path d={piece.path} fill={piece.fillTint} stroke="none" />
+                  <path
+                    d={piece.path}
+                    fill="none"
+                    stroke={piece.strokeColor}
+                    strokeWidth={2}
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                </g>
+              ))
+            ) : isPant ? (
+              // Fallback split for legacy compound path PANT
+              (() => {
+                const pieces = outlinePath
+                  .split(/(?=M\s)/)
+                  .map((p) => p.trim())
+                  .filter(Boolean);
+                const fills = [
+                  'rgba(108,99,255,0.07)',   // front – indigo tint
+                  'rgba(16,185,129,0.07)',   // back  – emerald tint
+                  'rgba(245,158,11,0.08)',   // waistband – amber tint
+                ];
+                const strokes = [
+                  '#4338CA',   // front  – darker indigo
+                  '#059669',   // back   – darker emerald
+                  '#B45309',   // waistband – darker amber
+                ];
+                return pieces.map((piece, i) => (
+                  <g key={i}>
+                    <path d={piece} fill={fills[i] ?? 'rgba(108,99,255,0.05)'} stroke="none" />
+                    <path
+                      d={piece}
+                      fill="none"
+                      stroke={strokes[i] ?? '#1E293B'}
+                      strokeWidth={i === 2 ? 1.5 : 2}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                  </g>
+                ));
+              })()
+            ) : (
+              <>
+                <path d={outlinePath} fill="rgba(108,99,255,0.05)" stroke="none" />
+                <path
+                  d={outlinePath}
+                  fill="none"
+                  stroke="#1E293B"
+                  strokeWidth={2}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              </>
+            )}
           </g>
+
+          {/* ── Seam Allowance Overlay ────────────────────── */}
+          {seamAllowance > 0 && (
+            <g className="seam-allowance">
+              <path
+                d={outlinePath}
+                fill="none"
+                stroke="#F59E0B"
+                strokeWidth={seamAllowance * 2}
+                strokeDasharray="5 4"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeOpacity={0.55}
+              />
+            </g>
+          )}
 
           {/* ── Measurement Annotations ──────────────────── */}
           <g className="annotations">
@@ -181,31 +309,105 @@ const PatternCanvas = forwardRef<PatternCanvasHandle, PatternCanvasProps>(
                 <text
                   x={p.point.x + 6}
                   y={p.point.y - 5}
-                  fontSize={10}
+                  fontSize={9}
                   fontWeight="700"
                   fill="#6C63FF"
                   fontFamily="Inter, sans-serif"
                 >
                   {p.label}
                 </text>
-                {/* Tooltip-style description on hover via title */}
                 {p.description && <title>{`${p.label}: ${p.description}`}</title>}
               </g>
             ))}
           </g>
 
-          {/* ── Centre-front fold indicator ──────────────── */}
-          <text
-            x={16}
-            y={svgH / 2}
-            fontSize={9}
-            fill="#94A3B8"
-            fontFamily="Inter, sans-serif"
-            transform={`rotate(-90, 16, ${svgH / 2})`}
-            textAnchor="middle"
-          >
-            ← FOLD / CENTRE FRONT →
-          </text>
+          {/* ── Piece Title Labels & Grainline Arrows ── */}
+          {patternData.pieces && patternData.pieces.length > 0 ? (
+            <g className="piece-meta-labels">
+              {patternData.pieces.map((piece) => (
+                <g key={`meta-${piece.id}`}>
+                  {piece.labelCx !== undefined && piece.labelCy !== undefined && (
+                    <PieceLabel
+                      x={piece.labelCx}
+                      y={piece.labelCy}
+                      text={piece.label}
+                      sub={piece.subLabel}
+                    />
+                  )}
+                  {piece.grainCx !== undefined &&
+                    piece.grainCy !== undefined &&
+                    piece.grainLen !== undefined && (
+                      <GrainLine
+                        cx={piece.grainCx}
+                        cy={piece.grainCy}
+                        len={piece.grainLen}
+                        label="Grain"
+                      />
+                    )}
+                </g>
+              ))}
+            </g>
+          ) : isPant ? (
+            (() => {
+              const fRise   = (outseamLen - inseamLen) * scale;
+              const fInseam = inseamLen * scale;
+              const frontH  = 10 * scale;
+
+              const frontCX = fX0 + frontH * 0.5 + 0.2 * frontH;
+              const frontCY = fY0 + fRise * 0.4;
+              const frontGrainLen = fRise * 0.5;
+
+              const backOffsetX = fX0 + frontH + (3.5 * scale) + (frontH + 0.5 * scale) + 0.35 * frontH + frontH * 0.5;
+              const backCY   = fY0 + fRise * 0.4;
+              const backGrainLen = fRise * 0.5;
+
+              const wbY0 = fY0 + fRise + fInseam + 2.5 * scale;
+              const wbLength = 33.5 * scale;
+              const wbCenterX = fX0 + wbLength / 2;
+              const wbCenterY = wbY0 + 0.75 * scale;
+
+              return (
+                <>
+                  <PieceLabel x={frontCX} y={frontCY} text="FRONT" sub="(Cut × 2)" />
+                  <GrainLine cx={frontCX} cy={frontCY + 30} len={frontGrainLen * 0.5} label="Grain" />
+                  <PieceLabel x={backOffsetX} y={backCY} text="BACK" sub="(Cut × 2)" />
+                  <GrainLine cx={backOffsetX} cy={backCY + 30} len={backGrainLen * 0.5} label="Grain" />
+                  <PieceLabel x={wbCenterX} y={wbCenterY} text="WAISTBAND" sub="(Cut × 2 on fold)" />
+
+                  <text x={fX0 + 2} y={fY0 - 5} fontSize={7} fill="#94A3B8" fontFamily="Inter, sans-serif">
+                    WAIST LINE
+                  </text>
+                  <text x={fX0 + 2} y={fY0 + fRise * 0.6 - 4} fontSize={7} fill="#94A3B8" fontFamily="Inter, sans-serif">
+                    HIP LINE
+                  </text>
+                  <text x={fX0 + 2} y={fY0 + fRise - 4} fontSize={7} fill="#94A3B8" fontFamily="Inter, sans-serif">
+                    CROTCH LINE
+                  </text>
+                  <text x={fX0 + 2} y={fY0 + fRise + fInseam * 0.45 - 4} fontSize={7} fill="#94A3B8" fontFamily="Inter, sans-serif">
+                    KNEE LINE
+                  </text>
+                  <text x={fX0 + 2} y={fY0 + fRise + fInseam - 4} fontSize={7} fill="#94A3B8" fontFamily="Inter, sans-serif">
+                    HEM LINE
+                  </text>
+                </>
+              );
+            })()
+          ) : null}
+
+          {/* ── Centre-front fold indicator (non-pant only) ─── */}
+          {!isPant && (
+            <text
+              x={16}
+              y={svgH / 2}
+              fontSize={9}
+              fill="#94A3B8"
+              fontFamily="Inter, sans-serif"
+              transform={`rotate(-90, 16, ${svgH / 2})`}
+              textAnchor="middle"
+            >
+              ← FOLD / CENTRE FRONT →
+            </text>
+          )}
 
           {/* ── Scale indicator ──────────────────────────── */}
           <g transform={`translate(${svgW - 80}, ${svgH - 24})`}>

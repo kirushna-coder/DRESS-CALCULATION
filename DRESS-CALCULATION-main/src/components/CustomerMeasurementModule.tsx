@@ -246,67 +246,80 @@ const CustomerMeasurementModule: React.FC<CustomerMeasurementModuleProps> = ({
         {/* Chest / Bust */}
         <div className="measure-field highlight">
           <label className="measure-label" htmlFor="m-bust">
-            Chest / Bust ({unit})
+            Chest / Bust ({unit}) <span className="req">*</span>
           </label>
           <div className="measure-input-row">
             <input
               id="m-bust"
               type="number"
               className="measure-input"
+              placeholder={unit === 'cm' ? 'e.g. 86 cm' : 'e.g. 34 in'}
               value={toDisplay(m.bust)}
               step="0.5"
               onChange={(e) => handleNumChange('bust', e.target.value)}
             />
             <span className="unit-tag">{unit}</span>
           </div>
+          {(m.bust < 20 || m.bust > 60) && (
+            <span className="field-warn">Expected range: 20-60 in</span>
+          )}
         </div>
 
         {/* Waist */}
         <div className="measure-field highlight">
           <label className="measure-label" htmlFor="m-waist">
-            Waist Circumference
+            Waist Circumference ({unit}) <span className="req">*</span>
           </label>
           <div className="measure-input-row">
             <input
               id="m-waist"
               type="number"
               className="measure-input"
+              placeholder={unit === 'cm' ? 'e.g. 71 cm' : 'e.g. 28 in'}
               value={toDisplay(m.waist)}
               step="0.5"
               onChange={(e) => handleNumChange('waist', e.target.value)}
             />
             <span className="unit-tag">{unit}</span>
           </div>
+          {(m.waist < 18 || m.waist > 60) && (
+            <span className="field-warn">Expected range: 18-60 in</span>
+          )}
         </div>
 
         {/* Hip */}
         <div className="measure-field highlight">
           <label className="measure-label" htmlFor="m-hip">
-            Hip Circumference
+            Hip Circumference ({unit}) <span className="req">*</span>
           </label>
           <div className="measure-input-row">
             <input
               id="m-hip"
               type="number"
               className="measure-input"
+              placeholder={unit === 'cm' ? 'e.g. 91 cm' : 'e.g. 36 in'}
               value={toDisplay(m.hip)}
               step="0.5"
               onChange={(e) => handleNumChange('hip', e.target.value)}
             />
             <span className="unit-tag">{unit}</span>
           </div>
+          {(m.hip < 20 || m.hip > 65) && (
+            <span className="field-warn">Expected range: 20-65 in</span>
+          )}
         </div>
 
         {/* Shoulder Width */}
         <div className="measure-field">
           <label className="measure-label" htmlFor="m-shoulder">
-            Shoulder Width
+            Shoulder Width ({unit}) <span className="req">*</span>
           </label>
           <div className="measure-input-row">
             <input
               id="m-shoulder"
               type="number"
               className="measure-input"
+              placeholder={unit === 'cm' ? 'e.g. 38 cm' : 'e.g. 15 in'}
               value={toDisplay(m.shoulderWidth)}
               step="0.25"
               onChange={(e) => handleNumChange('shoulderWidth', e.target.value)}
@@ -542,6 +555,39 @@ const CustomerMeasurementModule: React.FC<CustomerMeasurementModuleProps> = ({
             </div>
           </div>
         )}
+      </div>
+
+      {/* ── Generated Measurement & Size Summary ───────────── */}
+      <div className="measurement-generated-summary-card">
+        <h4 className="gen-summary-title">⚡ Generated Sizing &amp; Body Analysis</h4>
+        <div className="gen-summary-grid">
+          <div className="gen-summary-item highlight">
+            <span className="gen-label">Recommended Size:</span>
+            <span className="gen-val size-badge">
+              { (m.bust || 36) <= 32 ? 'XS' : (m.bust || 36) <= 35 ? 'S' : (m.bust || 36) <= 38 ? 'M' : (m.bust || 36) <= 42 ? 'L' : (m.bust || 36) <= 46 ? 'XL' : 'XXL' }
+              <span className="sub-size"> (Size {m.bust || 38})</span>
+            </span>
+          </div>
+
+          <div className="gen-summary-item">
+            <span className="gen-label">Fit Recommendation:</span>
+            <span className="gen-val fit-badge">
+              { m.gender === 'male' && m.shoulderWidth >= 17 ? 'Athletic Fit' : (m.waist || 30) > (m.bust || 36) ? 'Relaxed / Comfort Fit' : 'Regular Fit' }
+            </span>
+          </div>
+
+          <div className="gen-summary-item summary-full-row">
+            <span className="gen-label">Body Measurement Summary:</span>
+            <div className="summary-chips-row">
+              <span className="chip">Chest/Bust: {toDisplay(m.bust)} {unit}</span>
+              <span className="chip">Waist: {toDisplay(m.waist)} {unit}</span>
+              <span className="chip">Hip: {toDisplay(m.hip)} {unit}</span>
+              <span className="chip">Shoulder: {toDisplay(m.shoulderWidth)} {unit}</span>
+              <span className="chip">Height: {m.height || 165} cm</span>
+              <span className="chip">Weight: {m.weight || 60} kg</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ── Footer Actions ─────────────────────────────── */}

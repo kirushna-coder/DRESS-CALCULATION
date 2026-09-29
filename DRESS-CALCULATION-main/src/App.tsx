@@ -25,6 +25,7 @@ import SmartSizeStudio from './components/SmartSizeStudio';
 import AITailorAssistant from './components/AITailorAssistant';
 import FitConfidenceCard from './components/FitConfidenceCard';
 import SmartFabricRecommendation from './components/SmartFabricRecommendation';
+import WorkflowInsights from './components/WorkflowInsights';
 
 // Hooks & Utils
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -408,6 +409,15 @@ const App: React.FC = () => {
                   setCadPatternType(dressType === 'FROCK' ? 'ONE_PIECE' : (dressType as PatternType));
                   setActiveTab('cad_studio');
                 }}
+              />
+
+              <WorkflowInsights
+                dressType={dressType}
+                fabricType={fabricType}
+                measurements={measurements}
+                recommendation={aiRecommendation}
+                calculation={calculationResult}
+                onOpenAI={() => setActiveTab('ai_insights')}
               />
             </div>
           </div>
