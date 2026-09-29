@@ -36,7 +36,7 @@ export function validateGarmentFit(
     }
   }
 
-  if (['PANT', 'CHUDIDAR'].includes(patternType)) {
+  if (['PANT', 'CHUDIDAR', 'SALWAR'].includes(patternType)) {
     if (!outseam || outseam <= 0) missingFields.push('Trouser Outseam');
     if (!inseam || inseam <= 0) missingFields.push('Trouser Inseam');
   }
@@ -76,7 +76,7 @@ export function validateGarmentFit(
   }
 
   // 3. Seam Alignment Validation (Front vs Back Seams)
-  if (['PANT', 'CHUDIDAR'].includes(patternType)) {
+  if (['PANT', 'CHUDIDAR', 'SALWAR'].includes(patternType)) {
     const frontInseam = inseam > 0 ? inseam : 30;
     const backInseam = frontInseam + 0.25; // standard back leg stretch allowance in patternmaking
     const inseamDiff = Math.abs(backInseam - frontInseam);

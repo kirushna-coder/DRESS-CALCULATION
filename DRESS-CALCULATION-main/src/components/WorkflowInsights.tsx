@@ -18,7 +18,8 @@ const PATTERN_PARTS: Record<DressType, string[]> = {
   TSHIRT: ['Front', 'Back', 'Sleeve', 'Neckband'],
   KURTA: ['Front', 'Back', 'Sleeve', 'Collar', 'Side slit'],
   BLOUSE: ['Front bodice', 'Back bodice', 'Sleeve', 'Neck facing'],
-  CHUDIDAR: ['Front leg', 'Back leg', 'Waistband', 'Ankle cuff'],
+  CHUDIDAR: ['Front leg', 'Back leg', 'Waistband', 'Ankle churis'],
+  SALWAR: ['Pleated front leg', 'Pleated back leg', 'Waist belt yoke', 'Ankle poncha cuff'],
   FROCK: ['Bodice', 'Back bodice', 'Sleeve', 'Skirt panels'],
   SKIRT: ['Front panels', 'Back panels', 'Waistband', 'Zip facing'],
   JACKET: ['Front', 'Back', 'Sleeve', 'Collar', 'Lapel', 'Lining'],
@@ -28,7 +29,7 @@ const PATTERN_PARTS: Record<DressType, string[]> = {
 const PATTERN_NAMES: Record<DressType, string> = {
   SHIRT: 'Basic Shirt Pattern', PANT: 'Tapered Trouser Pattern', TSHIRT: 'Knit Tee Block',
   KURTA: 'Straight Kurta Pattern', BLOUSE: 'Fitted Bodice Pattern', CHUDIDAR: 'Chudidar Bottom Pattern',
-  FROCK: 'Bodice and Flared Skirt Pattern', SKIRT: 'A-Line Skirt Pattern',
+  SALWAR: 'Pleated Salwar Pattern', FROCK: 'Bodice and Flared Skirt Pattern', SKIRT: 'A-Line Skirt Pattern',
   JACKET: 'Structured Jacket Pattern', TOP: 'Casual Top Block',
 };
 

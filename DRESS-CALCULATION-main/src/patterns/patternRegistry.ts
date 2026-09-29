@@ -45,7 +45,7 @@ const cBez = (
 ) => `C ${cx1} ${cy1} ${cx2} ${cy2} ${ex} ${ey}`;
 
 export interface DressPatternMeta {
-  patternType: 'tshirt' | 'shirt' | 'pant' | 'kurta' | 'blouse' | 'chudidar' | 'skirt' | 'kurti' | 'kids' | 'frock' | 'jacket' | 'top';
+  patternType: 'tshirt' | 'shirt' | 'pant' | 'kurta' | 'blouse' | 'chudidar' | 'salwar' | 'skirt' | 'kurti' | 'kids' | 'frock' | 'jacket' | 'top';
   measurements: string[];
   previewType: string;
   fabricNote: string;
@@ -104,7 +104,13 @@ export const dressPatternConfig: Record<PatternType, DressPatternMeta> = {
     patternType: 'chudidar',
     measurements: ['waist', 'hip', 'outseam', 'inseam', 'bottomWidth'],
     previewType: 'chudidar',
-    fabricNote: 'Bias-cut salwar with tapered leg and gathered ankle flow.',
+    fabricNote: 'Fitted bias-cut leg with narrow ankle contour and extra length for gathered churis.',
+  },
+  SALWAR: {
+    patternType: 'salwar',
+    measurements: ['waist', 'hip', 'outseam', 'inseam', 'bottomWidth'],
+    previewType: 'salwar',
+    fabricNote: 'Loose pleated salwar with wide thigh, waist gathers, and ankle poncha cuff.',
   },
   SKIRT: {
     patternType: 'skirt',
@@ -1138,6 +1144,142 @@ function calculateChudidarPattern(m: Measurements, scale: number): PatternData {
   return { outlinePath: outline, pieces, points, constructionLines, annotations, bounds: { width: bCB + px(halfHip * 1.5, scale) + px(4, scale), height: wbY0 + wbH + px(4, scale) } };
 }
 
+function calculateSalwarPattern(m: Measurements, scale: number): PatternData {
+  const waistCirc = (m.waist || 32) + (m.ease || 2);
+  const hipCirc   = (m.hip || 40) + (m.ease || 2);
+  const outseam   = m.outseam || 40;
+  const bottomW   = m.bottomWidth || 14;
+
+  const halfWaist = waistCirc / 4;
+  const halfHip   = hipCirc / 4;
+  const halfPoncha = bottomW / 2;
+
+  const pleatWidth = halfWaist * 2.2;
+  const thighWidth = halfHip * 1.8;
+  const crotchDepth = outseam * 0.35;
+
+  const gap = px(3, scale);
+  const originX = 36;
+  const originY = 30;
+
+  const fX0 = originX;
+  const fY0 = originY;
+  const fCF = fX0;
+  const fWaist = fCF + px(pleatWidth, scale);
+  const fCrotchX = fCF + px(thighWidth, scale);
+  const fCrotchY = fY0 + px(crotchDepth, scale);
+  const fHemY = fY0 + px(outseam - 2.5, scale);
+  const fPonchaX = fCF + px(halfPoncha, scale);
+
+  const frontPath = [
+    `M ${fCF} ${fY0}`,
+    `L ${fWaist} ${fY0}`,
+    createCrotchPathSegment(fWaist, fY0, fWaist, fY0 + crotchDepth * 0.4, fCrotchX, fCrotchY, true),
+    cBez(fCrotchX - px(1, scale), fCrotchY + (fHemY - fCrotchY) * 0.4, fPonchaX + px(2, scale), fHemY - px(2, scale), fPonchaX, fHemY),
+    `L ${fCF} ${fHemY}`,
+    `L ${fCF} ${fY0}`,
+    'Z',
+  ].join(' ');
+
+  const bX0 = fX0 + px(pleatWidth, scale) + gap;
+  const bY0 = originY;
+  const bCB = bX0;
+  const bWaist = bCB + px(pleatWidth, scale);
+  const bCrotchX = bCB + px(thighWidth + 1.2, scale);
+  const bCrotchY = fY0 + px(crotchDepth + 1.5, scale);
+  const bPonchaX = bCB + px(halfPoncha + 0.5, scale);
+
+  const backPath = [
+    `M ${bCB} ${bY0}`,
+    `L ${bWaist} ${bY0}`,
+    createCrotchPathSegment(bWaist, bY0, bWaist, bY0 + crotchDepth * 0.4, bCrotchX, bCrotchY, false),
+    cBez(bCrotchX - px(1, scale), bCrotchY + (fHemY - bCrotchY) * 0.4, bPonchaX + px(2, scale), fHemY - px(2, scale), bPonchaX, fHemY),
+    `L ${bCB} ${fHemY}`,
+    `L ${bCB} ${bY0}`,
+    'Z',
+  ].join(' ');
+
+  const wbX0 = originX;
+  const wbY0 = fHemY + gap + px(4, scale);
+  const wbLen = px(waistCirc * 1.1, scale);
+  const wbH = px(5, scale);
+
+  const waistbandPath = createCurvedWaistbandPath(wbX0, wbY0, wbLen, wbH, px(0.3, scale));
+
+  const pcX0 = wbX0 + wbLen + gap;
+  const pcY0 = wbY0;
+  const pcLen = px(bottomW, scale);
+  const pcH = px(2.5, scale);
+
+  const ponchaPath = [
+    `M ${pcX0} ${pcY0}`,
+    `L ${pcX0 + pcLen} ${pcY0}`,
+    `L ${pcX0 + pcLen} ${pcY0 + pcH}`,
+    `L ${pcX0} ${pcY0 + pcH}`,
+    'Z',
+  ].join(' ');
+
+  const pieces: PatternPiece[] = [
+    {
+      id: 'salwar_front',
+      label: 'SALWAR FRONT LEG (PLEATED)',
+      subLabel: '(Cut 2)',
+      path: frontPath,
+      fillTint: 'rgba(79, 70, 229, 0.08)',
+      strokeColor: '#4F46E5',
+      labelCx: fCF + px(pleatWidth * 0.4, scale),
+      labelCy: fY0 + px(crotchDepth * 0.6, scale),
+      grainCx: fCF + px(pleatWidth * 0.4, scale),
+      grainCy: fY0 + px(crotchDepth * 1.2, scale),
+      grainLen: px(6, scale),
+    },
+    {
+      id: 'salwar_back',
+      label: 'SALWAR BACK LEG (PLEATED)',
+      subLabel: '(Cut 2)',
+      path: backPath,
+      fillTint: 'rgba(16, 185, 129, 0.08)',
+      strokeColor: '#059669',
+      labelCx: bCB + px(pleatWidth * 0.4, scale),
+      labelCy: bY0 + px(crotchDepth * 0.6, scale),
+      grainCx: bCB + px(pleatWidth * 0.4, scale),
+      grainCy: bY0 + px(crotchDepth * 1.2, scale),
+      grainLen: px(6, scale),
+    },
+    {
+      id: 'salwar_waistband',
+      label: 'SALWAR WAIST BELT YOKE',
+      subLabel: '(Cut 1)',
+      path: waistbandPath,
+      fillTint: 'rgba(124, 58, 237, 0.08)',
+      strokeColor: '#7C3AED',
+      labelCx: wbX0 + wbLen / 2,
+      labelCy: wbY0 + wbH / 2,
+    },
+    {
+      id: 'salwar_poncha',
+      label: 'ANKLE PONCHA / CUFF BAND',
+      subLabel: '(Cut 2 with stiff canvas)',
+      path: ponchaPath,
+      fillTint: 'rgba(217, 119, 6, 0.08)',
+      strokeColor: '#D97706',
+      labelCx: pcX0 + pcLen / 2,
+      labelCy: pcY0 + pcH / 2,
+    },
+  ];
+
+  const outline = [frontPath, backPath, waistbandPath, ponchaPath].join(' ');
+  return {
+    outlinePath: outline,
+    pieces,
+    points: [{ label: 'S-W', point: { x: fCF, y: fY0 }, description: 'Salwar waist pleat origin' }],
+    constructionLines: [],
+    annotations: [],
+    bounds: { width: pcX0 + pcLen + px(4, scale), height: wbY0 + wbH + px(4, scale) },
+  };
+}
+
+
 function calculateSkirtPattern(m: Measurements, scale: number): PatternData {
   const waistCirc = (m.waist || 28) + (m.ease || 1);
   const hipCirc   = (m.hip || 38) + (m.ease || 1);
@@ -1394,6 +1536,267 @@ function calculateKidsPattern(m: Measurements, scale: number): PatternData {
   return { outlinePath: outline, pieces, points, constructionLines, annotations, bounds: { width: slX0 + slWidth + px(4, scale), height: fHemY + px(4, scale) } };
 }
 
+export function calculateJacketPattern(m: Measurements, scale: number): PatternData {
+  const halfChest = (m.bust + (m.ease || 4)) / 4;
+  const halfShoulder = m.shoulderWidth || 4.2;
+  const len = m.fullLength || 28;
+  const sleeveL = m.sleeveLength || 24;
+  const armD = m.armholeDepth || 9;
+  const neckW = (m.neckWidth || 3.2) / 2;
+
+  const gap = px(3, scale);
+  const originX = 36;
+  const originY = 30;
+
+  const fX0 = originX;
+  const fY0 = originY;
+  const fCF = fX0;
+  const fNeck = fCF + px(neckW, scale);
+  const fSh = fCF + px(halfShoulder, scale);
+  const fChest = fCF + px(halfChest, scale);
+  const fHem = fChest;
+  const fHemY = fY0 + px(len, scale);
+  const fArmY = fY0 + px(armD, scale);
+  const fNeckDipY = fY0 + px(neckW * 1.2, scale);
+  const fShY = fY0 + px(1.5, scale);
+
+  const lapelExt = px(2, scale);
+  const frontPath = [
+    `M ${fCF - lapelExt} ${fNeckDipY}`,
+    `L ${fCF} ${fY0}`,
+    `L ${fNeck} ${fY0}`,
+    `L ${fSh} ${fShY}`,
+    createArmholePathSegment(fSh, fShY, fChest, fArmY, px(armD, scale), true),
+    `L ${fHem} ${fHemY}`,
+    `L ${fCF - lapelExt} ${fHemY}`,
+    `L ${fCF - lapelExt} ${fNeckDipY}`,
+    'Z',
+  ].join(' ');
+
+  const bX0 = fX0 + px(halfChest, scale) + gap;
+  const bY0 = originY;
+  const bCB = bX0;
+  const bNeck = bCB + px(neckW, scale);
+  const bSh = bCB + px(halfShoulder, scale);
+  const bChest = bCB + px(halfChest, scale);
+  const bNeckDipY = bY0 + px(1.0, scale);
+
+  const backPath = [
+    `M ${bCB} ${bNeckDipY}`,
+    createBackNecklineSegment(bCB, bNeckDipY, bNeck, bY0),
+    `L ${bSh} ${fShY}`,
+    createArmholePathSegment(bSh, fShY, bChest, fArmY, px(armD, scale), false),
+    `L ${bChest} ${fHemY}`,
+    `L ${bCB} ${fHemY}`,
+    `L ${bCB} ${bNeckDipY}`,
+    'Z',
+  ].join(' ');
+
+  const slX0 = bX0 + px(halfChest, scale) + gap;
+  const slY0 = originY;
+  const slWidth = px(armD * 2, scale);
+  const slCapH = px(armD * 0.6, scale);
+  const slLen = px(sleeveL, scale);
+  const slMidX = slX0 + slWidth / 2;
+
+  const jacketCaps = createSleeveCapPathSegments(slX0, slY0 + slCapH, slMidX, slY0, slX0 + slWidth, slY0 + slCapH, slCapH);
+
+  const sleevePath = [
+    `M ${slX0} ${slY0 + slCapH}`,
+    jacketCaps.leftCap,
+    jacketCaps.rightCap,
+    `L ${slX0 + slWidth * 0.8} ${slY0 + slLen}`,
+    `L ${slX0 + slWidth * 0.2} ${slY0 + slLen}`,
+    `L ${slX0} ${slY0 + slCapH}`,
+    'Z',
+  ].join(' ');
+
+  const pieces: PatternPiece[] = [
+    {
+      id: 'front_jacket',
+      label: 'JACKET FRONT',
+      subLabel: '(Cut 2)',
+      path: frontPath,
+      fillTint: 'rgba(79, 70, 229, 0.08)',
+      strokeColor: '#4F46E5',
+      labelCx: fCF + px(halfChest * 0.5, scale),
+      labelCy: fY0 + px(len * 0.4, scale),
+      grainCx: fCF + px(halfChest * 0.5, scale),
+      grainCy: fY0 + px(len * 0.6, scale),
+      grainLen: px(4, scale),
+    },
+    {
+      id: 'back_jacket',
+      label: 'JACKET BACK',
+      subLabel: '(Cut 1 on fold)',
+      path: backPath,
+      fillTint: 'rgba(16, 185, 129, 0.08)',
+      strokeColor: '#059669',
+      labelCx: bCB + px(halfChest * 0.5, scale),
+      labelCy: bY0 + px(len * 0.4, scale),
+      grainCx: bCB + px(halfChest * 0.5, scale),
+      grainCy: bY0 + px(len * 0.6, scale),
+      grainLen: px(4, scale),
+    },
+    {
+      id: 'sleeve_jacket',
+      label: 'JACKET SLEEVE',
+      subLabel: '(Cut 2 pair)',
+      path: sleevePath,
+      fillTint: 'rgba(217, 119, 6, 0.08)',
+      strokeColor: '#D97706',
+      labelCx: slMidX,
+      labelCy: slY0 + slCapH + px(1.5, scale),
+      grainCx: slMidX,
+      grainCy: slY0 + slCapH + px(3, scale),
+      grainLen: px(2.5, scale),
+    },
+  ];
+
+  const outline = [frontPath, backPath, sleevePath].join(' ');
+  return {
+    outlinePath: outline,
+    pieces,
+    points: [{ label: 'J-A', point: { x: fCF, y: fY0 }, description: 'Jacket Shoulder Point' }],
+    constructionLines: [],
+    annotations: [],
+    bounds: { width: slX0 + slWidth + px(4, scale), height: fHemY + px(4, scale) },
+  };
+}
+
+export function calculateTopPattern(m: Measurements, scale: number): PatternData {
+  const halfChest = (m.bust + (m.ease || 2)) / 4;
+  const halfShoulder = m.shoulderWidth || 3.7;
+  const len = m.fullLength || 24;
+  const sleeveL = m.sleeveLength || 7;
+  const armD = m.armholeDepth || 8;
+  const neckW = (m.neckWidth || 3.5) / 2;
+  const neckD = m.neckDepth || 6;
+
+  const gap = px(3, scale);
+  const originX = 36;
+  const originY = 30;
+
+  const fX0 = originX;
+  const fY0 = originY;
+  const fCF = fX0;
+  const fNeck = fCF + px(neckW, scale);
+  const fSh = fCF + px(halfShoulder, scale);
+  const fChest = fCF + px(halfChest, scale);
+  const fWaist = fCF + px(halfChest * 0.9, scale);
+  const fHem = fCF + px(halfChest * 0.98, scale);
+  const fHemY = fY0 + px(len, scale);
+  const fArmY = fY0 + px(armD, scale);
+  const fWaistY = fY0 + px(len * 0.6, scale);
+  const fNeckDipY = fY0 + px(neckD, scale);
+  const fShY = fY0 + px(1.0, scale);
+
+  const frontPath = [
+    `M ${fCF} ${fNeckDipY}`,
+    createFrontNecklineSegment(fCF, fNeckDipY, fNeck, fY0),
+    `L ${fSh} ${fShY}`,
+    createArmholePathSegment(fSh, fShY, fChest, fArmY, px(armD, scale), true),
+    cBez(fChest - px(0.3, scale), fArmY + (fWaistY - fArmY) * 0.5, fWaist + px(0.1, scale), fWaistY, fWaist, fWaistY),
+    cBez(fWaist, fWaistY + (fHemY - fWaistY) * 0.5, fHem, fHemY - px(0.5, scale), fHem, fHemY),
+    cBez(fHem - px(1, scale), fHemY + px(0.5, scale), fCF + px(2, scale), fHemY + px(0.5, scale), fCF, fHemY),
+    `L ${fCF} ${fNeckDipY}`,
+    'Z',
+  ].join(' ');
+
+  const bX0 = fX0 + px(halfChest, scale) + gap;
+  const bY0 = originY;
+  const bCB = bX0;
+  const bNeck = bCB + px(neckW, scale);
+  const bSh = bCB + px(halfShoulder, scale);
+  const bChest = bCB + px(halfChest, scale);
+  const bWaist = bCB + px(halfChest * 0.9, scale);
+  const bHem = bCB + px(halfChest * 0.98, scale);
+  const bNeckDipY = bY0 + px(1.5, scale);
+
+  const backPath = [
+    `M ${bCB} ${bNeckDipY}`,
+    createBackNecklineSegment(bCB, bNeckDipY, bNeck, bY0),
+    `L ${bSh} ${fShY}`,
+    createArmholePathSegment(bSh, fShY, bChest, fArmY, px(armD, scale), false),
+    cBez(bChest - px(0.3, scale), fArmY + (fWaistY - fArmY) * 0.5, bWaist + px(0.1, scale), fWaistY, bWaist, fWaistY),
+    cBez(bWaist, fWaistY + (fHemY - fWaistY) * 0.5, bHem, fHemY - px(0.5, scale), bHem, fHemY),
+    cBez(bHem - px(1, scale), fHemY + px(0.5, scale), bCB + px(2, scale), fHemY + px(0.5, scale), bCB, fHemY),
+    `L ${bCB} ${bNeckDipY}`,
+    'Z',
+  ].join(' ');
+
+  const slX0 = bX0 + px(halfChest, scale) + gap;
+  const slY0 = originY;
+  const slWidth = px(armD * 1.8, scale);
+  const slCapH = px(armD * 0.5, scale);
+  const slLen = px(sleeveL, scale);
+  const slMidX = slX0 + slWidth / 2;
+
+  const topCaps = createSleeveCapPathSegments(slX0, slY0 + slCapH, slMidX, slY0, slX0 + slWidth, slY0 + slCapH, slCapH);
+
+  const sleevePath = [
+    `M ${slX0} ${slY0 + slCapH}`,
+    topCaps.leftCap,
+    topCaps.rightCap,
+    `L ${slX0 + slWidth * 0.75} ${slY0 + slLen}`,
+    `L ${slX0 + slWidth * 0.25} ${slY0 + slLen}`,
+    `L ${slX0} ${slY0 + slCapH}`,
+    'Z',
+  ].join(' ');
+
+  const pieces: PatternPiece[] = [
+    {
+      id: 'front_top',
+      label: 'TOP FRONT',
+      subLabel: '(Cut 1 on fold)',
+      path: frontPath,
+      fillTint: 'rgba(79, 70, 229, 0.08)',
+      strokeColor: '#4F46E5',
+      labelCx: fCF + px(halfChest * 0.5, scale),
+      labelCy: fY0 + px(len * 0.4, scale),
+      grainCx: fCF + px(halfChest * 0.5, scale),
+      grainCy: fY0 + px(len * 0.6, scale),
+      grainLen: px(4, scale),
+    },
+    {
+      id: 'back_top',
+      label: 'TOP BACK',
+      subLabel: '(Cut 1 on fold)',
+      path: backPath,
+      fillTint: 'rgba(16, 185, 129, 0.08)',
+      strokeColor: '#059669',
+      labelCx: bCB + px(halfChest * 0.5, scale),
+      labelCy: bY0 + px(len * 0.4, scale),
+      grainCx: bCB + px(halfChest * 0.5, scale),
+      grainCy: bY0 + px(len * 0.6, scale),
+      grainLen: px(4, scale),
+    },
+    {
+      id: 'sleeve_top',
+      label: 'TOP SLEEVE',
+      subLabel: '(Cut 2 pair)',
+      path: sleevePath,
+      fillTint: 'rgba(217, 119, 6, 0.08)',
+      strokeColor: '#D97706',
+      labelCx: slMidX,
+      labelCy: slY0 + slCapH + px(1, scale),
+      grainCx: slMidX,
+      grainCy: slY0 + slCapH + px(2, scale),
+      grainLen: px(1.5, scale),
+    },
+  ];
+
+  const outline = [frontPath, backPath, sleevePath].join(' ');
+  return {
+    outlinePath: outline,
+    pieces,
+    points: [{ label: 'T-A', point: { x: fCF, y: fNeckDipY }, description: 'Top Scoop Neck' }],
+    constructionLines: [],
+    annotations: [],
+    bounds: { width: slX0 + slWidth + px(4, scale), height: fHemY + px(4, scale) },
+  };
+}
+
 export interface PatternDefinition {
   id: PatternType;
   label: string;
@@ -1461,10 +1864,17 @@ export const PATTERN_REGISTRY: Record<string, PatternDefinition> = {
   },
   CHUDIDAR: {
     id: 'CHUDIDAR',
-    label: 'Chudidar / Salwar',
-    description: 'Bias-cut leg panel with gathered ankle churis',
+    label: 'Fitted Chudidar',
+    description: 'Fitted leg draft with narrow ankle contour and gathered churis',
     defaultMeasurements: ONE_PIECE_DEFAULTS,
     calculate: calculateChudidarPattern,
+  },
+  SALWAR: {
+    id: 'SALWAR',
+    label: 'Pleated Salwar',
+    description: 'Voluminous loose leg panel with waist pleats and ankle poncha band',
+    defaultMeasurements: ONE_PIECE_DEFAULTS,
+    calculate: calculateSalwarPattern,
   },
   SKIRT: {
     id: 'SKIRT',
@@ -1485,14 +1895,14 @@ export const PATTERN_REGISTRY: Record<string, PatternDefinition> = {
     label: 'Structured Jacket',
     description: 'Jacket front/back with lapel, collar and set-in sleeves',
     defaultMeasurements: ONE_PIECE_DEFAULTS,
-    calculate: calculateShirtPattern, // re-uses shirt block geometry
+    calculate: calculateJacketPattern,
   },
   TOP: {
     id: 'TOP',
     label: 'Casual Top',
-    description: 'Relaxed-fit top with curved hem and simple armhole shaping',
+    description: 'Relaxed-fit casual top with scoop neckline, curved hem and cap sleeves',
     defaultMeasurements: ONE_PIECE_DEFAULTS,
-    calculate: calculateKurtiPattern, // re-uses kurti block geometry
+    calculate: calculateTopPattern,
   },
 };
 
@@ -1504,6 +1914,7 @@ export const PATTERN_TYPES: PatternType[] = [
   'KURTA',
   'BLOUSE',
   'CHUDIDAR',
+  'SALWAR',
   'SKIRT',
   'KURTI',
   'KIDS',

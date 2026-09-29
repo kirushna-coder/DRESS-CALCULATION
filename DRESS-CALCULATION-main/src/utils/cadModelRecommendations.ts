@@ -102,12 +102,20 @@ export const dressMaterialData: Record<PatternType, {
     previewType: 'tshirt',
   },
   CHUDIDAR: {
-    dressName: 'Chudidar / Salwar',
-    recommendedMaterials: ['Cotton', 'Rayon', 'Silk Blend'],
-    defaultMaterial: 'Cotton',
-    fabricRequirement: '3.5 to 5 meters',
+    dressName: 'Fitted Chudidar Bottom',
+    recommendedMaterials: ['Cotton Cambric', 'Lycra Cotton Stretch', 'Rayon'],
+    defaultMaterial: 'Cotton Cambric',
+    fabricRequirement: '2.2 to 2.8 meters',
     colourOptions: ['Ivory White', 'Royal Navy', 'Charcoal Black', 'Terracotta'],
     previewType: 'chudidar',
+  },
+  SALWAR: {
+    dressName: 'Pleated Salwar Bottom',
+    recommendedMaterials: ['Cotton', 'Rayon', 'Patiala Satin', 'Crepe'],
+    defaultMaterial: 'Cotton',
+    fabricRequirement: '3.0 to 4.5 meters',
+    colourOptions: ['Ivory White', 'Royal Navy', 'Imperial Purple', 'Terracotta', 'Emerald Green'],
+    previewType: 'salwar',
   },
   SKIRT: {
     dressName: 'A-Line / Flared Skirt',
@@ -482,19 +490,19 @@ export const CAD_MODEL_SPECS: Record<string, CADModelSpecification> = {
 
   CHUDIDAR: {
     id: 'CHUDIDAR',
-    label: 'Chudidar / Salwar Bottom',
+    label: 'Fitted Chudidar Bottom',
     category: 'Traditional',
-    description: 'Traditional salwar/chudidar pants with upper pleat fullness and tapered bias-cut ankle gathers (churis).',
-    primaryRecommendation: 'Cotton, Rayon, Silk blend',
-    rationale: 'True bias-cut cambric cotton or rayon stretches naturally around the calves, creating rich accordion ankle ripples.',
+    description: 'Form-fitting leg draft with bias-cut stretch and extra ankle length for gathered churi ripples.',
+    primaryRecommendation: 'Cotton Cambric, Lycra Stretch Cotton, Rayon',
+    rationale: 'True 45-degree diagonal bias cut allows cambric cotton or stretch jersey to contour tightly across calves while creating soft ankle churis.',
     availableFabrics: [
       'Pure Cambric Cotton (60s)',
+      'Lycra Cotton Stretch (220 GSM)',
       'Viscose Rayon Solid',
       'Soft Silk-Cotton Blend',
-      'Lycra Cotton Stretch',
     ],
-    recommendedUsage: 'True 45-degree bias fold to create stretchy accordion ripples at the ankle.',
-    cuttingLayout: 'Two full bias lengths with upper waistband yoke pieced from corner salvage.',
+    recommendedUsage: 'True 45-degree diagonal bias fold to create stretchy accordion ripples at the ankle.',
+    cuttingLayout: 'Two full bias leg lengths with upper waistband casing pieced from corner salvage.',
     baseQuantityMeters: 2.35,
     calculateQuantity: (m: Measurements) => {
       const len = m.outseam || m.fullLength || 42;
@@ -513,10 +521,50 @@ export const CAD_MODEL_SPECS: Record<string, CADModelSpecification> = {
       { label: 'Waist / Yoke', key: 'waist', defaultVal: 32 },
       { label: 'Hip', key: 'hip', defaultVal: 40 },
       { label: 'Outseam Length', key: 'outseam', defaultVal: 42 },
-      { label: 'Ankle Width', key: 'bottomWidth', defaultVal: 10 },
+      { label: 'Ankle Width', key: 'bottomWidth', defaultVal: 8 },
     ],
-    easeRecommendation: '3.0" hip room for unrestricted sitting and movement.',
-    imagePlaceholderAlt: 'Chudidar Salwar with Ankle Gathers SVG Illustration',
+    easeRecommendation: '1.0" calf ease with bias stretch for sleek fit.',
+    imagePlaceholderAlt: 'Fitted Chudidar with Narrow Ankle Gathers SVG Illustration',
+  },
+
+  SALWAR: {
+    id: 'SALWAR',
+    label: 'Pleated Salwar Bottom',
+    category: 'Traditional',
+    description: 'Voluminous loose salwar leg draft featuring wide thigh room, waist pleats, and stiffened ankle poncha band.',
+    primaryRecommendation: 'Cotton, Patiala Satin, Rayon, Crepe',
+    rationale: 'Breathable cambric cotton or Patiala satin holds crisp waist pleats and fluid leg volume without sagging at the ankle poncha.',
+    availableFabrics: [
+      'Cambric Cotton (60s)',
+      'Patiala Satin Fabric',
+      'Viscose Rayon Printed',
+      'Cotton Khadi Woven',
+      'Poly-Crepe Fluid Blend',
+    ],
+    recommendedUsage: 'Full 44" or 58" width layout with waist pleats gathered into upper belt yoke.',
+    cuttingLayout: 'Two wide leg lengths plus upper waistband yoke and stiffened ankle poncha remnants.',
+    baseQuantityMeters: 3.5,
+    calculateQuantity: (m: Measurements) => {
+      const len = m.outseam || m.fullLength || 40;
+      const meters = Math.ceil(((len * 2.5 + 24) * 0.0254) * 20) / 20;
+      return { meters: Math.max(3.0, meters), yards: Number((meters * 1.0936).toFixed(2)) };
+    },
+    suitableColors: [
+      { name: 'Ivory White', hex: '#F8FAFC', dark: false },
+      { name: 'Royal Navy', hex: '#1E3A8A', dark: true },
+      { name: 'Imperial Purple', hex: '#6D28D9', dark: true },
+      { name: 'Terracotta', hex: '#C2410C', dark: false },
+      { name: 'Emerald Green', hex: '#065F46', dark: true },
+      { name: 'Champagne Gold', hex: '#D97706', dark: false },
+    ],
+    keyMeasurementFields: [
+      { label: 'Waist / Yoke', key: 'waist', defaultVal: 32 },
+      { label: 'Hip', key: 'hip', defaultVal: 40 },
+      { label: 'Outseam Length', key: 'outseam', defaultVal: 40 },
+      { label: 'Poncha / Ankle Width', key: 'bottomWidth', defaultVal: 14 },
+    ],
+    easeRecommendation: '4.0" - 6.0" generous hip and thigh ease for voluminous waist pleats.',
+    imagePlaceholderAlt: 'Pleated Voluminous Salwar with Ankle Poncha SVG Illustration',
   },
 
   SKIRT: {
@@ -596,5 +644,89 @@ export const CAD_MODEL_SPECS: Record<string, CADModelSpecification> = {
     ],
     easeRecommendation: '2.5" - 3.0" generous ease for growth and active playtime.',
     imagePlaceholderAlt: "Kids' Wear Soft Garment SVG Illustration",
+  },
+
+  JACKET: {
+    id: 'JACKET',
+    label: 'Structured Jacket',
+    category: 'Unisex',
+    description: 'Tailored jacket with notched lapel, collar, set-in sleeves, and structured shoulder pads.',
+    primaryRecommendation: 'Wool Blend, Cotton Twill, Linen',
+    rationale: 'Worsted wool and heavy twill support structured lapels, shoulder seams, and crisp ironed edges.',
+    availableFabrics: [
+      'Worsted Wool Blend (320 GSM)',
+      'Heavy Cotton Twill (10 oz)',
+      'European Linen Suiting',
+      'Poly-Viscose Blazer Blend',
+      'Velvet / Corduroy',
+    ],
+    recommendedUsage: 'Lengthwise grain layout with fusible interfacing on front lapels and collar.',
+    cuttingLayout: 'Two-piece sleeve layout alongside front & back panels on 58" width fabric.',
+    baseQuantityMeters: 2.8,
+    calculateQuantity: (m: Measurements) => {
+      const len = m.fullLength || 28;
+      const slv = m.sleeveLength || 24;
+      const meters = Math.ceil(((len + slv + 14) * 0.0254) * 20) / 20;
+      return { meters: Math.max(2.5, meters), yards: Number((meters * 1.0936).toFixed(2)) };
+    },
+    suitableColors: [
+      { name: 'Charcoal Black', hex: '#18181B', dark: true },
+      { name: 'Royal Navy', hex: '#1E3A8A', dark: true },
+      { name: 'Camel Brown', hex: '#78350F', dark: true },
+      { name: 'Ivory White', hex: '#F8FAFC', dark: false },
+      { name: 'Sage Olive', hex: '#4D7C0F', dark: false },
+      { name: 'Burgundy Wine', hex: '#881337', dark: true },
+    ],
+    keyMeasurementFields: [
+      { label: 'Bust / Chest', key: 'bust', defaultVal: 38 },
+      { label: 'Shoulder Width', key: 'shoulderWidth', defaultVal: 16 },
+      { label: 'Jacket Length', key: 'fullLength', defaultVal: 28 },
+      { label: 'Sleeve Length', key: 'sleeveLength', defaultVal: 24 },
+      { label: 'Armhole Depth', key: 'armholeDepth', defaultVal: 9 },
+    ],
+    easeRecommendation: '3.0" - 4.0" chest ease for suit layering.',
+    imagePlaceholderAlt: 'Tailored Structured Jacket SVG Illustration',
+  },
+
+  TOP: {
+    id: 'TOP',
+    label: 'Casual Top',
+    category: 'Women',
+    description: 'Relaxed-fit casual top featuring a scoop neckline, short cap sleeves, and a curved hem line.',
+    primaryRecommendation: 'Cotton, Rayon, Georgette',
+    rationale: 'Breathable combed cotton and fluid viscose rayon provide lightweight everyday comfort with a soft drape.',
+    availableFabrics: [
+      'Combed Cotton Poplin (60s)',
+      'Viscose Rayon Challis',
+      'Poly-Georgette Fluid Blend',
+      'Linen-Cotton Slub',
+      'Modal Jersey',
+    ],
+    recommendedUsage: 'Front and back on straight fold with cap sleeves cut from salvage remnant.',
+    cuttingLayout: 'Lengthwise 2-panel fold layout on 44" or 58" fabric width.',
+    baseQuantityMeters: 1.6,
+    calculateQuantity: (m: Measurements) => {
+      const len = m.fullLength || 24;
+      const slv = m.sleeveLength || 7;
+      const meters = Math.ceil(((len + slv + 8) * 0.0254) * 20) / 20;
+      return { meters: Math.max(1.4, meters), yards: Number((meters * 1.0936).toFixed(2)) };
+    },
+    suitableColors: [
+      { name: 'Blush Rose', hex: '#BE185D', dark: false },
+      { name: 'Sky Blue', hex: '#0284C7', dark: false },
+      { name: 'Ivory White', hex: '#F8FAFC', dark: false },
+      { name: 'Sage Olive', hex: '#4D7C0F', dark: false },
+      { name: 'Champagne Gold', hex: '#D97706', dark: false },
+      { name: 'Royal Navy', hex: '#1E3A8A', dark: true },
+    ],
+    keyMeasurementFields: [
+      { label: 'Bust', key: 'bust', defaultVal: 36 },
+      { label: 'Waist', key: 'waist', defaultVal: 30 },
+      { label: 'Top Length', key: 'fullLength', defaultVal: 24 },
+      { label: 'Sleeve Length', key: 'sleeveLength', defaultVal: 7 },
+      { label: 'Neck Depth', key: 'neckDepth', defaultVal: 6 },
+    ],
+    easeRecommendation: '2.0" bust ease for a comfortable relaxed contour.',
+    imagePlaceholderAlt: 'Casual Top SVG Illustration',
   },
 };

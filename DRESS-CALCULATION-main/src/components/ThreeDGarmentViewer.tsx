@@ -644,6 +644,43 @@ const ThreeDGarmentViewer: React.FC<ThreeDGarmentViewerProps> = ({
         break;
       }
 
+      case 'SALWAR': {
+        // Loose Voluminous Salwar Legs with Pleats & Ankle Poncha Cuff
+        const legH = 2.0 * lenScale;
+        const legGeo = new THREE.CylinderGeometry(0.58 * hipScale, 0.24, legH, 24);
+
+        const leftLeg = new THREE.Mesh(legGeo, mainMaterial);
+        leftLeg.position.set(-0.28 * hipScale, -0.45, 0);
+        group.add(leftLeg);
+
+        const rightLeg = new THREE.Mesh(legGeo, mainMaterial);
+        rightLeg.position.set(0.28 * hipScale, -0.45, 0);
+        group.add(rightLeg);
+
+        // Ankle Poncha / Cuff Bands
+        const ponchaGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.18, 20);
+        const ponchaMat = new THREE.MeshStandardMaterial({
+          color: color,
+          roughness: 0.5,
+          metalness: 0.2,
+        });
+
+        const ponchaL = new THREE.Mesh(ponchaGeo, ponchaMat);
+        ponchaL.position.set(-0.28 * hipScale, -1.35, 0);
+        group.add(ponchaL);
+
+        const ponchaR = new THREE.Mesh(ponchaGeo, ponchaMat);
+        ponchaR.position.set(0.28 * hipScale, -1.35, 0);
+        group.add(ponchaR);
+
+        // Upper Waistband Yoke
+        const yokeGeo = new THREE.CylinderGeometry(0.48 * waistScale, 0.52 * waistScale, 0.25, 24);
+        const yoke = new THREE.Mesh(yokeGeo, mainMaterial);
+        yoke.position.y = 0.45;
+        group.add(yoke);
+        break;
+      }
+
       case 'JACKET': {
         // Structured Blazer Jacket with Notched Lapels
         const jacketShape = new THREE.Shape();

@@ -145,6 +145,15 @@ export function calculateFabricRequirement(
       break;
     }
 
+    case 'SALWAR': {
+      // Salwar has voluminous leg pleats requiring 3.0 to 4.5 meters
+      totalInchesNeeded = (m.outseam || lengthInches) * 2.5 + 24;
+      totalInchesNeeded = Math.max(120, totalInchesNeeded); // ~3.0 meters minimum
+      layoutSuggestion = 'Voluminous 2-panel length lay with waist pleats gathered into upper belt yoke.';
+      wasteEstimate = 10;
+      break;
+    }
+
     case 'FROCK': {
       // Bodice + circular / gathered flared skirt + sleeves
       const bodiceLength = 15;

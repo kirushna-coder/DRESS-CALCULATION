@@ -146,6 +146,7 @@ export type DressType =
   | 'KURTA'
   | 'BLOUSE'
   | 'CHUDIDAR'
+  | 'SALWAR'
   | 'FROCK'
   | 'SKIRT'
   | 'JACKET'

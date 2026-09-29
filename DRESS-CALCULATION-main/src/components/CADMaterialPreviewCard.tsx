@@ -186,28 +186,60 @@ const CADMaterialPreviewCard: React.FC<CADMaterialPreviewCardProps> = ({
       case 'CHUDIDAR':
         return (
           <g id="model-chudidar">
-            {/* Yoke */}
-            <path d="M 125 80 L 275 80 L 265 130 L 135 130 Z" fill={selectedColor} stroke="#0F172A" strokeWidth="2" />
-            {/* Gathered Legs */}
+            {/* Upper Casing */}
+            <path d="M 140 80 L 260 80 L 250 120 L 150 120 Z" fill={selectedColor} stroke="#0F172A" strokeWidth="2" />
+            {/* Fitted Slim Legs */}
             <path
-              d="M 135 130 Q 115 170 140 230 L 160 380 L 180 380 L 195 230 L 205 230 L 220 380 L 240 380 L 260 230 Q 285 170 265 130 Z"
+              d="M 150 120 Q 135 170 155 230 L 170 380 L 185 380 L 195 230 L 205 230 L 215 380 L 230 380 L 245 230 Q 265 170 250 120 Z"
               fill={selectedColor}
               stroke="#0F172A"
               strokeWidth="2.5"
               strokeLinejoin="round"
             />
-            {/* Ankle Churi Gathers */}
-            <g stroke="#0F172A" strokeWidth="1.5" opacity={0.6}>
-              <path d="M 155 320 Q 170 325 185 320" fill="none" />
-              <path d="M 157 335 Q 170 340 183 335" fill="none" />
-              <path d="M 159 350 Q 170 355 181 350" fill="none" />
-              <path d="M 160 365 Q 170 370 180 365" fill="none" />
+            {/* Fitted Narrow Ankle Churi Gather Rings */}
+            <g stroke="#0F172A" strokeWidth="1.5" opacity={0.75}>
+              <path d="M 167 315 Q 177 320 188 315" fill="none" />
+              <path d="M 168 330 Q 177 335 186 330" fill="none" />
+              <path d="M 169 345 Q 177 350 185 345" fill="none" />
+              <path d="M 170 360 Q 177 365 184 360" fill="none" />
 
-              <path d="M 215 320 Q 230 325 245 320" fill="none" />
-              <path d="M 217 335 Q 230 340 243 335" fill="none" />
-              <path d="M 219 350 Q 230 355 241 350" fill="none" />
-              <path d="M 220 365 Q 230 370 240 365" fill="none" />
+              <path d="M 212 315 Q 223 320 233 315" fill="none" />
+              <path d="M 214 330 Q 223 335 232 330" fill="none" />
+              <path d="M 215 345 Q 223 350 231 345" fill="none" />
+              <path d="M 216 360 Q 223 365 230 360" fill="none" />
             </g>
+          </g>
+        );
+
+      case 'SALWAR':
+        return (
+          <g id="model-salwar">
+            {/* Upper Waist Yoke */}
+            <rect x="130" y="80" width="140" height="28" rx="3" fill={selectedColor} stroke="#0F172A" strokeWidth="2.5" />
+            <line x1="130" y1="94" x2="270" y2="94" stroke="#0F172A" strokeWidth="1" strokeDasharray="3 2" />
+            {/* Loose Voluminous Pleated Legs */}
+            <path
+              d="M 130 108 C 80 180 85 280 125 350 L 175 350 C 190 280 195 200 200 108 C 205 200 210 280 225 350 L 275 350 C 315 280 320 180 270 108 Z"
+              fill={selectedColor}
+              stroke="#0F172A"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+            />
+            {/* Waist Pleat Folds */}
+            <g opacity={0.4} stroke="#FFFFFF" strokeWidth="1.5">
+              <path d="M 145 108 L 140 230" fill="none" />
+              <path d="M 160 108 L 155 240" fill="none" />
+              <path d="M 175 108 L 170 240" fill="none" />
+              <path d="M 225 108 L 230 240" fill="none" />
+              <path d="M 240 108 L 245 240" fill="none" />
+              <path d="M 255 108 L 260 230" fill="none" />
+            </g>
+            {/* Stiffened Ankle Poncha Cuff Bands */}
+            <rect x="125" y="348" width="50" height="18" rx="1" fill="#FFFFFF" opacity={0.9} stroke="#0F172A" strokeWidth="2" />
+            <rect x="225" y="348" width="50" height="18" rx="1" fill="#FFFFFF" opacity={0.9} stroke="#0F172A" strokeWidth="2" />
+            {/* Stitch details on Poncha */}
+            <line x1="125" y1="357" x2="175" y2="357" stroke="#0F172A" strokeWidth="1" strokeDasharray="2 1" />
+            <line x1="225" y1="357" x2="275" y2="357" stroke="#0F172A" strokeWidth="1" strokeDasharray="2 1" />
           </g>
         );
 
@@ -246,6 +278,53 @@ const CADMaterialPreviewCard: React.FC<CADMaterialPreviewCardProps> = ({
             <path d="M 170 120 Q 200 140 230 120 Q 200 130 170 120 Z" fill="#FFFFFF" stroke="#0F172A" strokeWidth="2" />
             {/* Heart Pocket */}
             <path d="M 225 240 C 220 235 210 235 210 245 C 210 255 225 265 225 265 C 225 265 240 255 240 245 C 240 235 230 235 225 240 Z" fill="#FFFFFF" opacity={0.8} />
+          </g>
+        );
+
+      case 'JACKET':
+        return (
+          <g id="model-jacket">
+            {/* Main Jacket Body */}
+            <path
+              d="M 130 100 L 85 120 L 70 210 L 105 218 L 125 170 L 125 330 L 275 330 L 275 170 L 295 218 L 330 210 L 315 120 L 270 100 Q 200 115 130 100 Z"
+              fill={selectedColor}
+              stroke="#0F172A"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+            />
+            {/* Sleeves */}
+            <path d="M 130 100 L 85 120 L 70 210 L 105 218 L 125 170 Z" fill={selectedColor} stroke="#0F172A" strokeWidth="2.5" />
+            <path d="M 270 100 L 315 120 L 330 210 L 295 218 L 275 170 Z" fill={selectedColor} stroke="#0F172A" strokeWidth="2.5" />
+            {/* Notched Lapels & Collar */}
+            <path d="M 160 95 L 200 135 L 175 180 L 135 150 L 160 95 Z" fill="#FFFFFF" stroke="#0F172A" strokeWidth="2" />
+            <path d="M 240 95 L 200 135 L 225 180 L 265 150 L 240 95 Z" fill="#FFFFFF" stroke="#0F172A" strokeWidth="2" />
+            {/* Center Opening */}
+            <line x1="200" y1="135" x2="200" y2="330" stroke="#0F172A" strokeWidth="2" />
+            {/* Flap Pockets */}
+            <rect x="135" y="240" width="45" height="15" rx="2" fill="#FFFFFF" opacity={0.3} stroke="#0F172A" strokeWidth="1.5" />
+            <rect x="220" y="240" width="45" height="15" rx="2" fill="#FFFFFF" opacity={0.3} stroke="#0F172A" strokeWidth="1.5" />
+            {/* Buttons */}
+            <circle cx="190" cy="210" r="3.5" fill="#D97706" stroke="#0F172A" strokeWidth="1" />
+            <circle cx="190" cy="250" r="3.5" fill="#D97706" stroke="#0F172A" strokeWidth="1" />
+          </g>
+        );
+
+      case 'TOP':
+        return (
+          <g id="model-top">
+            {/* Relaxed Body with Scoop Neck and Curved Hem */}
+            <path
+              d="M 140 105 L 105 125 L 95 175 L 128 178 L 135 155 L 130 295 Q 200 315 270 295 L 265 155 L 272 178 L 305 175 L 295 125 L 260 105 Q 200 145 140 105 Z"
+              fill={selectedColor}
+              stroke="#0F172A"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+            />
+            {/* Scoop Neckline Trim */}
+            <path d="M 140 105 Q 200 145 260 105" fill="none" stroke="#FFFFFF" strokeWidth="2.5" />
+            {/* Side Fit Creases */}
+            <path d="M 145 190 Q 155 240 150 290" fill="none" stroke="#FFFFFF" strokeWidth="1.2" opacity={0.35} />
+            <path d="M 255 190 Q 245 240 250 290" fill="none" stroke="#FFFFFF" strokeWidth="1.2" opacity={0.35} />
           </g>
         );
 

@@ -26,6 +26,7 @@ const ALL_DRESS_TYPES: DressType[] = [
   'JACKET',
   'KURTA',
   'CHUDIDAR',
+  'SALWAR',
 ];
 
 const DressSelector: React.FC<DressSelectorProps> = ({
