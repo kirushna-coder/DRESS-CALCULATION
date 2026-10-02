@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { RefreshCw, Save, FileDown, Image } from 'lucide-react';
-import type { Measurements, Unit } from '../types';
+import type { Measurements, PatternType, Unit } from '../types';
 import type { CadMeasurementKey } from '../calculations/onePieceDress';
 import { MEASUREMENT_BOUNDS } from '../calculations/onePieceDress';
 import { inchToCm, cmToInch } from '../utils/unitConversion';
@@ -13,6 +13,7 @@ import { inchToCm, cmToInch } from '../utils/unitConversion';
 interface MeasurementFormProps {
   measurements: Measurements;
   unit: Unit;
+  patternType: PatternType;
   onChange: (m: Measurements) => void;
   onGenerate: () => void;
   onReset: () => void;
@@ -40,9 +41,19 @@ const FIELD_ORDER: MeasurementKey[] = [
   'ease',
 ];
 
+const TOP_FIELD_ORDER: MeasurementKey[] = [
+  'backNeckDepth',
+  'shoulderSlope',
+  'waistLength',
+  'hipDepth',
+  'sleeveLength',
+  'bicepCircumference',
+];
+
 const MeasurementForm: React.FC<MeasurementFormProps> = ({
   measurements,
   unit,
+  patternType,
   onChange,
   onGenerate,
   onReset,
@@ -55,6 +66,7 @@ const MeasurementForm: React.FC<MeasurementFormProps> = ({
 
   // Convert internal inch value → display value for the input
   const toDisplay = (key: MeasurementKey, val: number | undefined): string => {
+    if (val === undefined && TOP_FIELD_ORDER.includes(key)) return '';
     const num = val ?? 0;
     if (key === 'dressSize') return String(num);
     return String(unit === 'cm' ? inchToCm(num) : num);
@@ -98,7 +110,7 @@ const MeasurementForm: React.FC<MeasurementFormProps> = ({
       </div>
 
       <div className="form-fields">
-        {FIELD_ORDER.map((key) => {
+        {[...FIELD_ORDER, ...(patternType === 'TOP' ? TOP_FIELD_ORDER : [])].map((key) => {
           const bounds = MEASUREMENT_BOUNDS[key];
           const displayVal = toDisplay(key, measurements[key]);
           const hasError = Boolean(errors[key]);

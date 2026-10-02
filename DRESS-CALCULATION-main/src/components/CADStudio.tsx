@@ -308,6 +308,7 @@ const CADStudio: React.FC<CADStudioProps> = ({
           <MeasurementForm
             measurements={currentMeasurements}
             unit={unit}
+            patternType={patternType}
             onChange={handleMeasurementsUpdate}
             onGenerate={() => {}}
             onReset={handleReset}

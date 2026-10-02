@@ -25,6 +25,10 @@ export interface Measurements {
   height?: number; // cm or in
   weight?: number; // kg or lbs
   sleeveLength?: number;
+  backNeckDepth?: number;
+  shoulderSlope?: number;
+  waistLength?: number;
+  hipDepth?: number;
   sleeveType?: 'Short Sleeve' | 'Long Sleeve' | '3/4 Sleeve' | 'Sleeveless';
   bicepCircumference?: number;
   crossBack?: number;

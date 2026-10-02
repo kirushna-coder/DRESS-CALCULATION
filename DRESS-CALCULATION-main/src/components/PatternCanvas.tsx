@@ -1,7 +1,7 @@
 // ============================================================
 // Fabriplay – PatternCanvas Component
 // Renders the SVG pattern with all layers:
-//   1. Grid background
+//   1. CAD grid background (minor + major lines)
 //   2. Construction (guide) lines
 //   3. Dress outline path(s) — supports compound paths for PANT
 //   4. Measurement annotations
@@ -9,6 +9,7 @@
 //   6. [PANT] Piece title labels, grainline arrows
 //   7. [PANT] Optional seam allowance offset overlay
 // Supports panning via mouse drag.
+// Grid elements carry data-grid="true" and are stripped on SVG export.
 // ============================================================
 
 import React, { useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
@@ -29,7 +30,9 @@ interface PatternCanvasProps {
   seamAllowance?: number; // in pixels; 0 = off
 }
 
-const GRID_SIZE = 20; // px between grid dots
+// Grid geometry constants
+// Minor subdivisions per major division (so 4 minor cells = 1 inch at default scale)
+const MINOR_DIVS = 4;
 
 // ── Grainline Arrow helper ──────────────────────────────────
 // Renders a double-headed grainline arrow at (cx, cy) of given length (vertical)
@@ -171,19 +174,58 @@ const PatternCanvas = forwardRef<PatternCanvasHandle, PatternCanvasProps>(
           style={{ transform: `translate(${pan.x}px, ${pan.y}px)` }}
           aria-label="Dress pattern canvas"
         >
-          {/* ── Grid Background ──────────────────────────── */}
-          <defs>
+          {/* ── CAD Grid Background ───────────────────────── */}
+          {/* Grid spacing: scale px = 1 inch (major); scale/MINOR_DIVS px = 1/4 inch (minor) */}
+          <defs data-grid="true">
+            {/* Minor grid tile: 1/4-inch cell */}
             <pattern
-              id="grid"
-              width={GRID_SIZE}
-              height={GRID_SIZE}
+              id="cad-minor-grid"
+              width={scale / MINOR_DIVS}
+              height={scale / MINOR_DIVS}
               patternUnits="userSpaceOnUse"
             >
-              <circle cx={GRID_SIZE} cy={GRID_SIZE} r={0.8} fill="#E2E8F0" />
+              {/* Vertical minor line */}
+              <line
+                x1={scale / MINOR_DIVS} y1={0}
+                x2={scale / MINOR_DIVS} y2={scale / MINOR_DIVS}
+                stroke="#E2E8F0" strokeWidth={0.4}
+              />
+              {/* Horizontal minor line */}
+              <line
+                x1={0} y1={scale / MINOR_DIVS}
+                x2={scale / MINOR_DIVS} y2={scale / MINOR_DIVS}
+                stroke="#E2E8F0" strokeWidth={0.4}
+              />
+            </pattern>
+            {/* Major grid tile: 1-inch cell (overlaid on top of minor) */}
+            <pattern
+              id="cad-major-grid"
+              width={scale}
+              height={scale}
+              patternUnits="userSpaceOnUse"
+            >
+              {/* Minor grid fill inside major tile */}
+              <rect width={scale} height={scale} fill="url(#cad-minor-grid)" />
+              {/* Vertical major line */}
+              <line
+                x1={scale} y1={0}
+                x2={scale} y2={scale}
+                stroke="#CBD5E1" strokeWidth={0.75}
+              />
+              {/* Horizontal major line */}
+              <line
+                x1={0} y1={scale}
+                x2={scale} y2={scale}
+                stroke="#CBD5E1" strokeWidth={0.75}
+              />
             </pattern>
           </defs>
-          <rect width={svgW} height={svgH} fill="white" />
-          <rect width={svgW} height={svgH} fill="url(#grid)" />
+          {/* White canvas base */}
+          <rect width={svgW} height={svgH} fill="#FAFBFC" data-grid="true" />
+          {/* Minor grid fill */}
+          <rect width={svgW} height={svgH} fill="url(#cad-minor-grid)" data-grid="true" />
+          {/* Major grid overlay */}
+          <rect width={svgW} height={svgH} fill="url(#cad-major-grid)" data-grid="true" />
 
           {/* ── Construction Lines ───────────────────────── */}
           <g className="construction-lines">

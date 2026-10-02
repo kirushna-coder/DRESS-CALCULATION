@@ -26,19 +26,21 @@ export function validateGarmentFit(
   const thigh = measurements.thighCircumference || 0;
   const knee = measurements.kneeCircumference || 0;
   const ankle = measurements.ankleCircumference || 0;
+  const armholeDepth = measurements.armholeDepth || 0;
+  const sleeveLength = measurements.sleeveLength || 0;
 
   // 1. Missing Core Measurement Check
   if (!waist || waist <= 0) missingFields.push('Waist Circumference');
   if (!hip || hip <= 0) missingFields.push('Hip Circumference');
   if (!bust || bust <= 0) {
-    if (['SHIRT', 'TSHIRT', 'KURTA', 'BLOUSE', 'JACKET', 'TOP', 'FROCK', 'ONE_PIECE'].includes(patternType)) {
+    if (['SHIRT', 'TSHIRT', 'KURTA', 'BLOUSE', 'JACKET', 'TOP', 'FROCK', 'ONE_PIECE', 'KURTI', 'KIDS'].includes(patternType)) {
       missingFields.push('Bust / Chest Circumference');
     }
   }
 
   if (['PANT', 'CHUDIDAR', 'SALWAR'].includes(patternType)) {
-    if (!outseam || outseam <= 0) missingFields.push('Trouser Outseam');
-    if (!inseam || inseam <= 0) missingFields.push('Trouser Inseam');
+    if (!outseam || outseam <= 0) missingFields.push('Outseam / Full Leg Length');
+    if (!inseam || inseam <= 0) missingFields.push('Inseam Length');
   }
 
   // 2. Proportional & Dimensional Checks
@@ -62,7 +64,7 @@ export function validateGarmentFit(
   }
 
   if (thigh > 0 && hip > 0) {
-    if (thigh * 2 > hip * 1.3) {
+    if (thigh * 2 > hip * 1.4) {
       dimensionWarnings.push('Thigh circumference is disproportionately large relative to Hip.');
     }
   }
@@ -75,14 +77,14 @@ export function validateGarmentFit(
     dimensionWarnings.push('Ankle circumference cannot exceed Knee circumference.');
   }
 
-  // 3. Seam Alignment Validation (Front vs Back Seams)
+  // 3. Seam Alignment Validation (Front vs Back Seams & Armhole vs Sleeve)
   if (['PANT', 'CHUDIDAR', 'SALWAR'].includes(patternType)) {
     const frontInseam = inseam > 0 ? inseam : 30;
     const backInseam = frontInseam + 0.25; // standard back leg stretch allowance in patternmaking
     const inseamDiff = Math.abs(backInseam - frontInseam);
 
     mismatches.push({
-      seamName: 'Pant Inseam Join (Front vs Back)',
+      seamName: 'Trouser Inseam Join (Front vs Back)',
       frontLength: Number(frontInseam.toFixed(2)),
       backLength: Number(backInseam.toFixed(2)),
       difference: Number(inseamDiff.toFixed(2)),
@@ -104,20 +106,51 @@ export function validateGarmentFit(
       message: `Back waistband is raised by ${outseamDiff.toFixed(2)}" for seating posture coverage.`,
       suggestion: 'Align front and back pieces starting from hip line down to hem during assembly.',
     });
-  } else if (['SHIRT', 'TSHIRT', 'KURTA', 'BLOUSE', 'JACKET', 'TOP'].includes(patternType)) {
+  } else if (['SKIRT'].includes(patternType)) {
+    const frontSide = measurements.fullLength || 28;
+    const backSide = frontSide;
+    mismatches.push({
+      seamName: 'Skirt Side Seam Join',
+      frontLength: Number(frontSide.toFixed(2)),
+      backLength: Number(backSide.toFixed(2)),
+      difference: 0,
+      severity: 'info',
+      message: 'Front and Back skirt side seams are perfectly trued.',
+      suggestion: 'Match waist notches down to hem sweep.',
+    });
+  } else {
+    // Top-body garments: ONE_PIECE, FROCK, SHIRT, TSHIRT, KURTA, BLOUSE, KURTI, KIDS, JACKET, TOP
     const frontShoulder = shoulder ? shoulder / 2 : 7.5;
-    const backShoulder = frontShoulder + 0.25; // back shoulder dart/ease
-    const diff = Math.abs(backShoulder - frontShoulder);
+    const backShoulder = frontShoulder + 0.25; // back shoulder ease/dart
+    const shoulderDiff = Math.abs(backShoulder - frontShoulder);
 
     mismatches.push({
       seamName: 'Shoulder Seam Join (Front vs Back)',
       frontLength: Number(frontShoulder.toFixed(2)),
       backLength: Number(backShoulder.toFixed(2)),
-      difference: Number(diff.toFixed(2)),
+      difference: Number(shoulderDiff.toFixed(2)),
       severity: 'info',
-      message: `Back shoulder includes ${diff.toFixed(2)}" ease for shoulder blade curvature.`,
+      message: `Back shoulder includes ${shoulderDiff.toFixed(2)}" ease for shoulder blade curvature.`,
       suggestion: 'Ease back shoulder seam evenly into front shoulder line when stitching.',
     });
+
+    // Armhole ↔ Sleeve Cap compatibility
+    if (sleeveLength > 0 || ['SHIRT', 'TSHIRT', 'KURTA', 'JACKET', 'TOP', 'ONE_PIECE', 'FROCK', 'KURTI'].includes(patternType)) {
+      const armDepth = armholeDepth || 6.5;
+      const totalArmholeArc = armDepth * 2.3; // approximate scye perimeter
+      const sleeveCapArc = armDepth * 2.4; // includes sleeve cap ease (0.5" - 1")
+      const capEase = sleeveCapArc - totalArmholeArc;
+
+      mismatches.push({
+        seamName: 'Armhole ↔ Sleeve Cap Curve Alignment',
+        frontLength: Number((totalArmholeArc / 2).toFixed(2)),
+        backLength: Number((sleeveCapArc / 2).toFixed(2)),
+        difference: Number(Math.abs(capEase).toFixed(2)),
+        severity: Math.abs(capEase) > 2.0 ? 'warning' : 'info',
+        message: `Sleeve cap contains ${capEase > 0 ? '+' : ''}${capEase.toFixed(2)}" ease for sleeve crown shape.`,
+        suggestion: 'Distribute cap ease evenly over top sleeve crown between front & back shoulder notches.',
+      });
+    }
   }
 
   // 4. Overall Confidence Calculation
