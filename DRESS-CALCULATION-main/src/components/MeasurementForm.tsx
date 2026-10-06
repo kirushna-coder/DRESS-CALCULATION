@@ -112,7 +112,7 @@ const MeasurementForm: React.FC<MeasurementFormProps> = ({
       <div className="form-fields">
         {[...FIELD_ORDER, ...(patternType === 'TOP' ? TOP_FIELD_ORDER : [])].map((key) => {
           const bounds = MEASUREMENT_BOUNDS[key];
-          const displayVal = toDisplay(key, measurements[key]);
+          const displayVal = toDisplay(key, measurements[key as keyof Measurements] as number | undefined);
           const hasError = Boolean(errors[key]);
           const isSize = key === 'dressSize';
 

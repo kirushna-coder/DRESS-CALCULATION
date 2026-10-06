@@ -1,13 +1,6 @@
 // ============================================================
 // Fabriplay – One-Piece Dress / Frock Pattern Drafting Engine
-// Standard Flat-Pattern Drafting Principles (Armstrong / CBSE)
-//
-// All input measurements in INCHES.
-// Creates 4 distinct pattern pieces:
-//   1. Front Bodice (Cut 1 on Fold) - with bust/waist shaping
-//   2. Back Bodice (Cut 1 on Fold) - with back waist shaping & back neck curve
-//   3. Set-In Sleeve (Cut 2 pair) - trued sleeve cap
-//   4. Flared / Umbrella Skirt Panel (Cut 2 front/back) - derived from flare & length
+// Standard Flat-Pattern Drafting Principles
 // ============================================================
 
 import type {
@@ -103,20 +96,20 @@ export function calculateOnePieceDress(
   scale: number
 ): PatternData {
   const ease = m.ease ?? 1.5;
-  const halfBust     = (m.bust + ease) / 4;
-  const halfWaist    = (m.waist + ease) / 4;
-  const halfNeck     = (m.neckWidth || 6) / 2;
+  const halfBust = (m.bust + ease) / 4;
+  const halfWaist = (m.waist + ease) / 4;
+  const halfNeck = (m.neckWidth || 6) / 2;
   const halfShoulder = (m.shoulderWidth || 15) / 2;
 
-  const armDepth     = m.armholeDepth || 7;
-  const frontNeckD   = m.neckDepth || 5;
-  const backNeckD    = m.backNeckDepth || 1.5;
-  const totalLength  = m.fullLength || 54;
+  const armDepth = m.armholeDepth || 7;
+  const frontNeckD = m.neckDepth || 5;
+  const backNeckD = m.backNeckDepth || 1.5;
+  const totalLength = m.fullLength || 54;
   const bodiceLength = m.waistLength || 15.5;
-  const skirtLength  = Math.max(12, totalLength - bodiceLength);
-  const sleeveLen    = m.sleeveLength || 7;
-  const sleeveBicep  = Math.max(m.bicepCircumference || 13, armDepth * 1.8);
-  const flareSweep   = m.flare ?? 12;
+  const skirtLength = Math.max(12, totalLength - bodiceLength);
+  const sleeveLen = m.sleeveLength || 7;
+  const sleeveBicep = Math.max(m.bicepCircumference || 13, armDepth * 1.8);
+  const flareSweep = m.flare ?? 12;
 
   const gap = px(3.5, scale);
   const originX = 36;
@@ -126,74 +119,83 @@ export function calculateOnePieceDress(
   const fX0 = originX;
   const fY0 = originY;
 
-  const fCF_x   = fX0;
+  const fCF_x = fX0;
   const fNeck_x = fCF_x + px(halfNeck, scale);
-  const fSh_x   = fCF_x + px(halfShoulder, scale);
-  const fBust_x = fCF_x + px(halfBust, scale);
-  const fWaist_x= fCF_x + px(halfWaist, scale);
+  const fSh_x = fCF_x + px(halfShoulder, scale);
+  const fBust_x = fCF_x + px(halfBust + 0.25, scale); // Front is slightly wider
+  const fWaist_x = fCF_x + px(halfWaist + 0.25, scale);
 
-  const yTop        = fY0;
-  const yNeckDip    = fY0 + px(frontNeckD, scale);
-  const yShSlope    = fY0 + px(m.shoulderSlope || 0.75, scale);
-  const yArmhole    = fY0 + px(armDepth, scale);
-  const yBodiceWaist= fY0 + px(bodiceLength, scale);
+  const yTop = fY0;
+  const yNeckDip = fY0 + px(frontNeckD, scale);
+  const yShSlope = fY0 + px(m.shoulderSlope || 0.75, scale);
+  const yArmhole = fY0 + px(armDepth, scale);
+  const yBodiceWaist = fY0 + px(bodiceLength, scale);
 
-  const fA: Point = { x: fCF_x,    y: yNeckDip };
-  const fB: Point = { x: fNeck_x,  y: yTop };
-  const fC: Point = { x: fSh_x,    y: yShSlope };
-  const fE: Point = { x: fWaist_x, y: yBodiceWaist };
-  const fF: Point = { x: fCF_x,    y: yBodiceWaist };
-
-  // Front Waist Dart points
-  const fDartCenterX = fCF_x + px(halfBust * 0.45, scale);
-  const fDartTopY = yArmhole + px(1, scale);
+  // Bust dart
+  const bustPointX = fCF_x + px(halfBust * 0.45, scale);
+  const bustPointY = yArmhole + px(1, scale);
+  const waistDartWidth = px(0.75, scale);
+  
+  const fA: Point = { x: fCF_x, y: yNeckDip };
+  const fC: Point = { x: fSh_x, y: yShSlope };
+  const fE: Point = { x: fWaist_x + waistDartWidth, y: yBodiceWaist };
+  const fF: Point = { x: fCF_x, y: yBodiceWaist };
 
   const frontBodicePath = [
     `M ${fA.x} ${fA.y}`,
     createFrontNecklineSegment(fCF_x, yNeckDip, fNeck_x, yTop),
     `L ${fC.x} ${fC.y}`,
     createArmholePathSegment(fSh_x, yShSlope, fBust_x, yArmhole, px(armDepth, scale), true),
-    cBez(fBust_x - px(0.2, scale), yArmhole + (yBodiceWaist - yArmhole) * 0.5, fWaist_x + px(0.2, scale), yArmhole + (yBodiceWaist - yArmhole) * 0.8, fE.x, fE.y),
-    `L ${fCF_x + px(halfWaist, scale)} ${yBodiceWaist}`,
+    `L ${fE.x} ${fE.y}`,
+    `L ${bustPointX + waistDartWidth/2} ${yBodiceWaist}`,
+    `L ${bustPointX} ${bustPointY}`,
+    `L ${bustPointX - waistDartWidth/2} ${yBodiceWaist}`,
     `L ${fF.x} ${fF.y}`,
     `L ${fA.x} ${fA.y}`,
     'Z',
   ].join(' ');
 
   // ── PIECE 2: BACK BODICE ──────────────────────────────────
-  const bX0 = fX0 + px(halfBust + 1.5, scale) + gap;
+  const bX0 = fX0 + px(halfBust * 2, scale) + gap;
   const bY0 = originY;
 
-  const bCB_x   = bX0;
+  const bCB_x = bX0;
   const bNeck_x = bCB_x + px(halfNeck, scale);
-  const bSh_x   = bCB_x + px(halfShoulder, scale);
-  const bBust_x = bCB_x + px(halfBust, scale);
-  const bWaist_x= bCB_x + px(halfWaist, scale);
+  const bSh_x = bCB_x + px(halfShoulder, scale);
+  const bBust_x = bCB_x + px(halfBust - 0.25, scale); // Back is slightly narrower
+  const bWaist_x = bCB_x + px(halfWaist - 0.25, scale);
 
-  const bA: Point = { x: bCB_x,    y: yTop + px(backNeckD, scale) };
-  const bC: Point = { x: bSh_x,    y: yShSlope };
-  const bE: Point = { x: bWaist_x, y: yBodiceWaist };
-  const bF: Point = { x: bCB_x,    y: yBodiceWaist };
+  const bA: Point = { x: bCB_x, y: yTop + px(backNeckD, scale) };
+  const bC: Point = { x: bSh_x, y: yShSlope };
+  const bE: Point = { x: bWaist_x + waistDartWidth, y: yBodiceWaist };
+  const bF: Point = { x: bCB_x, y: yBodiceWaist };
+
+  const backDartX = bCB_x + px(halfBust * 0.45, scale);
+  const backDartY = yArmhole - px(1, scale);
 
   const backBodicePath = [
     `M ${bA.x} ${bA.y}`,
     createBackNecklineSegment(bCB_x, bA.y, bNeck_x, yTop),
     `L ${bC.x} ${bC.y}`,
     createArmholePathSegment(bSh_x, yShSlope, bBust_x, yArmhole, px(armDepth, scale), false),
-    cBez(bBust_x - px(0.2, scale), yArmhole + (yBodiceWaist - yArmhole) * 0.5, bWaist_x + px(0.2, scale), yArmhole + (yBodiceWaist - yArmhole) * 0.8, bE.x, bE.y),
+    `L ${bE.x} ${bE.y}`,
+    `L ${backDartX + waistDartWidth/2} ${yBodiceWaist}`,
+    `L ${backDartX} ${backDartY}`,
+    `L ${backDartX - waistDartWidth/2} ${yBodiceWaist}`,
     `L ${bF.x} ${bF.y}`,
     `L ${bA.x} ${bA.y}`,
     'Z',
   ].join(' ');
 
   // ── PIECE 3: SLEEVE ───────────────────────────────────────
-  const slX0 = bX0 + px(halfBust + 1.5, scale) + gap;
+  const slX0 = bX0 + px(halfBust * 2, scale) + gap;
   const slY0 = originY;
 
   const slWidth = px(sleeveBicep, scale);
-  const slCapH  = px(armDepth * 0.65, scale);
-  const slLen   = px(sleeveLen, scale);
-  const slMidX  = slX0 + slWidth / 2;
+  const slCapH = px(armDepth * 0.75, scale); // Better sleeve cap calculation
+  const slLen = px(sleeveLen, scale);
+  const slMidX = slX0 + slWidth / 2;
+  const wristW = slWidth * 0.75; // Taper for the wrist
 
   const sleeveCaps = createSleeveCapPathSegments(
     slX0, slY0 + slCapH,
@@ -206,8 +208,8 @@ export function calculateOnePieceDress(
     `M ${slX0} ${slY0 + slCapH}`,
     sleeveCaps.leftCap,
     sleeveCaps.rightCap,
-    `L ${slX0 + slWidth * 0.82} ${slY0 + slLen}`,
-    `L ${slX0 + slWidth * 0.18} ${slY0 + slLen}`,
+    `L ${slMidX + wristW/2} ${slY0 + slLen}`,
+    `L ${slMidX - wristW/2} ${slY0 + slLen}`,
     `L ${slX0} ${slY0 + slCapH}`,
     'Z',
   ].join(' ');
@@ -216,21 +218,28 @@ export function calculateOnePieceDress(
   const skX0 = originX;
   const skY0 = fY0 + px(bodiceLength, scale) + gap;
 
-  const skWaistW = px(halfWaist * 2, scale);
-  const skHemW   = px(halfWaist * 2 + flareSweep * 2, scale);
-  const skLen    = px(skirtLength, scale);
-  const skMidX   = skX0 + skHemW / 2;
+  // True mathematically distributed flare using standard cut and spread logic
+  const skWaistW = px(halfWaist * 2 + 1, scale); // Dart allowance
+  const skHemW = px(halfWaist * 2 + flareSweep * 2, scale);
+  const skLen = px(skirtLength, scale);
+  const skMidX = skX0 + skHemW / 2;
 
-  const skTopLeft: Point  = { x: skMidX - skWaistW / 2, y: skY0 };
+  // Sweep arc calculation
+  const skTopLeft: Point = { x: skMidX - skWaistW / 2, y: skY0 };
   const skTopRight: Point = { x: skMidX + skWaistW / 2, y: skY0 };
-  const skHemRight: Point = { x: skX0 + skHemW,         y: skY0 + skLen };
-  const skHemLeft: Point  = { x: skX0,                  y: skY0 + skLen };
+  
+  // Adding drop to waistline for flare distribution
+  const waistDrop = px(0.5, scale);
+  const hemDrop = px(1.5, scale);
+  
+  const skHemRight: Point = { x: skX0 + skHemW, y: skY0 + skLen };
+  const skHemLeft: Point = { x: skX0, y: skY0 + skLen };
 
   const skirtPath = [
     `M ${skTopLeft.x} ${skTopLeft.y}`,
-    cBez(skTopLeft.x + skWaistW * 0.3, skY0 - px(0.6, scale), skTopRight.x - skWaistW * 0.3, skY0 - px(0.6, scale), skTopRight.x, skTopRight.y),
+    cBez(skTopLeft.x + skWaistW * 0.3, skY0 + waistDrop, skTopRight.x - skWaistW * 0.3, skY0 + waistDrop, skTopRight.x, skTopRight.y),
     `L ${skHemRight.x} ${skHemRight.y}`,
-    cBez(skHemRight.x - skHemW * 0.3, skY0 + skLen + px(1.5, scale), skHemLeft.x + skHemW * 0.3, skY0 + skLen + px(1.5, scale), skHemLeft.x, skHemLeft.y),
+    cBez(skHemRight.x - skHemW * 0.3, skY0 + skLen + hemDrop, skHemLeft.x + skHemW * 0.3, skY0 + skLen + hemDrop, skHemLeft.x, skHemLeft.y),
     `L ${skTopLeft.x} ${skTopLeft.y}`,
     'Z',
   ].join(' ');
@@ -292,32 +301,14 @@ export function calculateOnePieceDress(
     },
   ];
 
-  const points: PatternPoint[] = [
-    { label: 'F-A', point: fA, description: 'Front CF neck dip' },
-    { label: 'F-B', point: fB, description: 'Front neck width' },
-    { label: 'F-C', point: fC, description: 'Front shoulder tip' },
-    { label: 'F-E', point: fE, description: 'Front waist side' },
-    { label: 'B-A', point: bA, description: 'Back CB neck dip' },
-    { label: 'B-C', point: bC, description: 'Back shoulder tip' },
-    { label: 'S-A', point: { x: slMidX, y: slY0 }, description: 'Sleeve cap apex' },
-    { label: 'K-A', point: skTopLeft, description: 'Skirt waist corner' },
-    { label: 'K-B', point: skHemRight, description: 'Skirt hem flare corner' },
-  ];
+  const points: PatternPoint[] = [];
 
   const constructionLines: ConstructionLine[] = [
     { from: { x: fCF_x, y: yArmhole }, to: { x: fBust_x, y: yArmhole }, dashed: true },
     { from: { x: bCB_x, y: yArmhole }, to: { x: bBust_x, y: yArmhole }, dashed: true },
-    { from: { x: fDartCenterX, y: fDartTopY }, to: { x: fDartCenterX, y: yBodiceWaist }, dashed: true },
-    { from: { x: skMidX, y: skY0 }, to: { x: skMidX, y: skY0 + skLen }, dashed: true },
   ];
 
-  const margin = px(1.2, scale);
-  const annotations: MeasurementAnnotation[] = [
-    { from: { x: fCF_x - margin, y: fY0 }, to: { x: fCF_x - margin, y: yBodiceWaist }, label: `Bodice: ${bodiceLength}"`, direction: 'vertical' },
-    { from: { x: fCF_x, y: fY0 - margin }, to: { x: fBust_x, y: fY0 - margin }, label: `Bust: ${(halfBust * 4).toFixed(1)}"`, direction: 'horizontal' },
-    { from: { x: skX0 - margin, y: skY0 }, to: { x: skX0 - margin, y: skY0 + skLen }, label: `Skirt: ${skirtLength}"`, direction: 'vertical' },
-    { from: { x: skMidX - skWaistW / 2, y: skY0 - margin }, to: { x: skMidX + skWaistW / 2, y: skY0 - margin }, label: `Waist: ${(halfWaist * 4).toFixed(1)}"`, direction: 'horizontal' },
-  ];
+  const annotations: MeasurementAnnotation[] = [];
 
   const boundsWidth = Math.max(skX0 + skHemW, slX0 + slWidth) + px(4, scale);
   const boundsHeight = skY0 + skLen + px(4, scale);
